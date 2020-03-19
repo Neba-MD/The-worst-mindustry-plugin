@@ -152,8 +152,10 @@ public class UnitFactory {
         switch (unitName){
             case REAP:
                 unit = UnitTypes.reaper.create(player.getTeam());
+                break;
             case ERAD:
                 unit = UnitTypes.eradicator.create(player.getTeam());
+                break;
         }
         for(int i=0;i<unitStats.get(unitName)[unitCount];i++){
 
