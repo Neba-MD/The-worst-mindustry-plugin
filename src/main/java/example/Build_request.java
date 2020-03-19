@@ -14,14 +14,12 @@ public class Build_request{
     public int time;
 
     String unitName;
-    BaseUnit unitObj;
-    ExamplePlugin plugin;
     UnitFactory factory;
-    public Build_request(String unitName,BaseUnit unitObj,int time,ExamplePlugin plugin,UnitFactory factory){
+
+    public Build_request(String unitName,int time,UnitFactory factory){
         this.unitName=unitName;
         this.time=time;
-        this.unitObj=unitObj;
-        this.plugin=plugin;
+
         this.factory=factory;
         start_countdown();
     }
@@ -55,7 +53,7 @@ public class Build_request{
 
             building = false;
             Call.sendMessage("[green]" + unitName + " is finished and waiting in a hangar.You can use factory egan.");
-            factory.unitStats.get(unitName)[factory.unitCount]+=1;
+            factory.unitStats.get(unitName)[UnitFactory.unitCount]+=1;
         }, time);
     }
 }

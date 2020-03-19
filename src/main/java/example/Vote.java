@@ -4,13 +4,12 @@ import arc.util.Timer;
 import mindustry.entities.type.Player;
 import mindustry.gen.Call;
 import java.util.ArrayList;
-import java.util.TimerTask;
 
 import static mindustry.Vars.playerGroup;
 
 public class Vote {
-    ExamplePlugin plugin;
     UnitFactory factory;
+    Loadout loadout;
     Player player;
 
     String type;
@@ -26,9 +25,9 @@ public class Vote {
     ArrayList<String> list = new ArrayList<>();
     int require;
 
-    public Vote(ExamplePlugin plugin,UnitFactory factory) {
-        this.plugin = plugin;
+    public Vote(UnitFactory factory,Loadout loadout) {
         this.factory=factory;
+        this.loadout=loadout;
     }
 
     public boolean isIsvoting() {
@@ -66,17 +65,17 @@ public class Vote {
             case "use":
                 if (require <= 0) {
                     Call.sendMessage("vote-launch to core-done");
-                    plugin.use_layout(player);
+                    loadout.use_loadout(player);
                 } else {
                     Call.sendMessage("vote-launch to core-fail");
                 }
                 break;
             case "fill":
                 if (require <= 0) {
-                    Call.sendMessage("vote-launch to layout-done");
-                    plugin.use_layout(player);
+                    Call.sendMessage("vote-launch to loadout-done");
+                    loadout.use_loadout(player);
                 } else {
-                    Call.sendMessage("vote-launch to layout-fail");
+                    Call.sendMessage("vote-launch to loadout-fail");
                 }
                 break;
             case "release":
@@ -90,7 +89,7 @@ public class Vote {
             case "build":
                 if (require <= 0) {
                     Call.sendMessage("vote-build "+unitType+"-done");
-                    factory.build_unit(player,unitType);
+                    factory.build_unit(unitType);
                 } else {
                     Call.sendMessage("vote-build "+unitType+"-fail");
                 }
@@ -111,7 +110,7 @@ public class Vote {
             } else {
                 require = (int) Math.ceil((double) playerGroup.size() / 2);
             }
-            String message = Integer.toString(plugin.launch_amount) + " " + (plugin.launch_item == null ? " of every resource" : plugin.launch_item.name);
+            String message = loadout.launch_amount + " " + (loadout.launch_item == null ? " of every resource" : loadout.launch_item.name);
             switch (type) {
                 case "use":
                     Call.sendMessage("vote-to launch [orange]" + message + "[white] to core.Open chat window and sey [orange]'y' [white]to agree.");
@@ -164,7 +163,7 @@ public class Vote {
         if (require <= 0) {
             cancel();
         } else {
-            Call.sendMessage("[orange]" + Integer.toString(require) + " [white]more votes needet.");
+            Call.sendMessage("[orange]" + require + " [white]more votes needed.");
         }
     }
     public void interrupted() {
