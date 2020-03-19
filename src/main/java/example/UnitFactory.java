@@ -72,7 +72,7 @@ public class UnitFactory {
         if ("all".equals(unitName)) {
             return unitStats.get("lich")[unitCount] +
                     unitStats.get("reaper")[unitCount] +
-                    unitStats.get("eradicatr")[unitCount];
+                    unitStats.get("eradicator")[unitCount];
         }
         return unitStats.get(unitName)[unitCount];
     }
@@ -142,54 +142,32 @@ public class UnitFactory {
     public void interrupted() {
         interrupted = true;
     }
+    public void add_units(String unitName,ArrayList<BaseUnit> units){
+        for(int i=0;i<unitStats.get("lich")[unitCount];i++){
+            BaseUnit unit = UnitTypes.lich.create(player.getTeam());
+            unit.set(player.x,player.y);
+            units.add(unit);
+        }
+        unitStats.get(unitName)[unitCount]=0;
+    }
     public void send_units(Player player,String unitName){
         traveling=true;
         Call.sendMessage("[green]"+unitName+" were launched from hangar to "+player.name+"s position.");
         ArrayList<BaseUnit> units=new ArrayList<>();
         switch (unitName) {
             case "lich":
-                for(int i=0;i<unitStats.get("lich")[unitCount];i++){
-                    BaseUnit unit = UnitTypes.lich.create(player.getTeam());
-                    unit.set(player.x,player.y);
-                    units.add(unit);
-                }
-                unitStats.get(unitName)[unitCount]=0;
+                add_units("lich",units);
                 break;
             case "reaper":
-                for(int i=0;i<unitStats.get("reaper")[unitCount];i++){
-                    BaseUnit unit = UnitTypes.reaper.create(player.getTeam());
-                    unit.set(player.x,player.y);
-                    units.add(unit);
-                }
-                unitStats.get(unitName)[unitCount]=0;
+                add_units("reaper",units);
                 break;
             case "eradicator":
-                for(int i=0;i<unitStats.get("eradicator")[unitCount];i++){
-                    BaseUnit unit = UnitTypes.eradicator.create(player.getTeam());
-                    unit.set(player.x,player.y);
-                    units.add(unit);
-                }
-                unitStats.get(unitName)[unitCount]=0;
+                add_units("eradicator",units);
                 break;
             case "all":
-                for(int i=0;i<unitStats.get("lich")[unitCount];i++){
-                    BaseUnit unit = UnitTypes.lich.create(player.getTeam());
-                    unit.set(player.x,player.y);
-                    units.add(unit);;
-                }
-                unitStats.get("lich")[unitCount]=0;
-                for(int i=0;i<unitStats.get("reaper")[unitCount];i++){
-                    BaseUnit unit = UnitTypes.reaper.create(player.getTeam());
-                    unit.set(player.x,player.y);
-                    units.add(unit);
-                }
-                unitStats.get("reaper")[unitCount]=0;
-                for(int i=0;i<unitStats.get("eradicator")[unitCount];i++){
-                    BaseUnit unit = UnitTypes.eradicator.create(player.getTeam());
-                    unit.set(player.x,player.y);
-                    units.add(unit);
-                }
-                unitStats.get("eradicator")[unitCount]=0;
+                add_units("lich",units);
+                add_units("reaper",units);
+                add_units("eradicator",units);
                 break;
         }
 
