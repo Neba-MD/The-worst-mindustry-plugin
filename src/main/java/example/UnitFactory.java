@@ -68,6 +68,14 @@ public class UnitFactory {
         }
         return true;
     }
+    public int get_unit_count(String unitName){
+        if ("all".equals(unitName)) {
+            return unitStats.get("lich")[unitCount] +
+                    unitStats.get("reaper")[unitCount] +
+                    unitStats.get("eradicatr")[unitCount];
+        }
+        return unitStats.get(unitName)[unitCount];
+    }
     public boolean verify_deployment(Player player, String unitName){
         if(traveling){
             player.sendMessage("Units are being transported currently.They will arrive in " +
@@ -78,8 +86,8 @@ public class UnitFactory {
             player.sendMessage("Factory cannot build [red]" + unitName + "[white]. It can release oni reaper,lich and eradicator.");
             return false;
         }
-        if (!unitName.equals("all") && unitStats.get(unitName)[unitCount]==0){
-            player.sendMessage("[red]There are 0 "+unitName+"in hangar.");
+        if (get_unit_count(unitName)==0){
+            player.sendMessage("[red]There are "+get_unit_count(unitName)+" of "+unitName+" in hangar.");
             return false;
         }
         int x = (int) player.x;
