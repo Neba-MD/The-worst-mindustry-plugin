@@ -3,6 +3,7 @@ package example;
 
 
 import arc.util.Time;
+import com.sun.org.apache.regexp.internal.RE;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
 import mindustry.entities.type.Player;
@@ -21,6 +22,7 @@ public class UnitFactory {
     boolean interrupted=false;
     private final String ERAD="eradicator";
     private final String LICH="lich";
+    private final String REAP="reaper";
     ExamplePlugin plugin;
     HashMap<String, int[]> unitStats = new HashMap<>();
     int[] reaperCost = {10000, 10000, 4000, 3000, 5000, 1000, 5000, 500, 500, 500, 1, 0};
@@ -33,7 +35,7 @@ public class UnitFactory {
 
 
     public UnitFactory(ExamplePlugin plugin) {
-        unitStats.put("reaper", reaperCost);
+        unitStats.put(REAP, reaperCost);
         unitStats.put(LICH, lichCost);
         unitStats.put(ERAD, eradCost);
         this.plugin = plugin;
@@ -47,7 +49,7 @@ public class UnitFactory {
                     time / 60 + "min" + time % 60 + "sec.");
             return false;
         }
-        if (!unitName.equals("reaper") && !unitName.equals(LICH) && !unitName.equals(ERAD)) {
+        if (!unitName.equals(REAP) && !unitName.equals(LICH) && !unitName.equals(ERAD)) {
             player.sendMessage("Factory can not build [red]" + unitName + "[white]. It can build oni reaper,lich and eradicator.");
             return false;
         }
@@ -74,7 +76,7 @@ public class UnitFactory {
     public int get_unit_count(String unitName){
         if ("all".equals(unitName)) {
             return unitStats.get(LICH)[unitCount] +
-                    unitStats.get("reaper")[unitCount] +
+                    unitStats.get(REAP)[unitCount] +
                     unitStats.get(ERAD)[unitCount];
         }
         return unitStats.get(unitName)[unitCount];
@@ -85,7 +87,7 @@ public class UnitFactory {
                     time / 60 + "min" + time % 60 + "sec.");
             return false;
         }
-        if (!unitName.equals("reaper") && !unitName.equals(LICH) && !unitName.equals("all") && !unitName.equals(ERAD)) {
+        if (!unitName.equals(REAP) && !unitName.equals(LICH) && !unitName.equals("all") && !unitName.equals(ERAD)) {
             player.sendMessage("Factory cannot build [red]" + unitName + "[white]. It can release oni reaper,lich and eradicator.");
             return false;
         }
@@ -138,16 +140,24 @@ public class UnitFactory {
             player.sendMessage("No units are traveling currently.");
         }
 
-        player.sendMessage("There are "+unitStats.get(LICH)[unitCount]+" lichs, "+unitStats.get(ERAD)[unitCount]+
-                " reapers and "+unitStats.get("eradicator")[unitCount]+" eradicators in hangar.");
+        player.sendMessage("There are "+unitStats.get(LICH)[unitCount]+" lichs, "+unitStats.get(REAP)[unitCount]+
+                " reapers and "+unitStats.get(ERAD)[unitCount]+" eradicators in hangar.");
     }
 
     public void interrupted() {
         interrupted = true;
     }
-    public void add_units(String unitName,ArrayList<BaseUnit> units){
+    public void add_units(String unitName,ArrayList<BaseUnit> units,Player player){
+        BaseUnit unit = UnitTypes.lich.create(player.getTeam());
+        switch (unitName){
+            case REAP:
+                unit = UnitTypes.reaper.create(player.getTeam());
+            case ERAD:
+                unit = UnitTypes.eradicator.create(player.getTeam());
+        }
         for(int i=0;i<unitStats.get(unitName)[unitCount];i++){
-            BaseUnit unit = UnitTypes.lich.create(player.getTeam());
+
+
             unit.set(player.x,player.y);
             units.add(unit);
         }
@@ -159,18 +169,18 @@ public class UnitFactory {
         ArrayList<BaseUnit> units=new ArrayList<>();
         switch (unitName) {
             case LICH:
-                add_units(LICH,units);
+                add_units(LICH,units,player);
                 break;
-            case "reaper":
-                add_units("reaper",units);
+            case REAP:
+                add_units(REAP,units,player);
                 break;
             case ERAD:
-                add_units(ERAD,units);
+                add_units(ERAD,units,player);
                 break;
             case "all":
-                add_units(LICH,units);
-                add_units("reaper",units);
-                add_units(ERAD,units);
+                add_units(LICH,units,player);
+                add_units(REAP,units,player);
+                add_units(ERAD,units,player);
                 break;
         }
 
@@ -178,6 +188,7 @@ public class UnitFactory {
         Timer.schedule(()->{
             if(interrupted){
                 Call.sendChatMessage("Units were sent back to hangar.");
+                traveling=false;
                 interrupted=false;
                 return;
             }

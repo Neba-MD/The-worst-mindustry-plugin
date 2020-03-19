@@ -101,6 +101,7 @@ public class Vote {
     }
 
     public void command() {
+            list.clear();
             isvoting = true;
             if(playerGroup.size()==1){
                 require=1;
