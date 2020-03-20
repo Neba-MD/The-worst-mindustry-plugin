@@ -232,8 +232,12 @@ public class UnitFactory {
         }
         StringBuilder message= new StringBuilder();
         message.append("[orange]").append(unitName.toUpperCase()).append("[white]").append("\n\n");
+        message.append("in loadout / price    \n");
         for(int i=0;i<10;i++){
-            message.append(unitStats.get(unitName)[i]).append(MyPlugin.itemIcons[i]).append("\n");
+            int inLoadout=loadout.storage[i];
+            int price=unitStats.get(unitName)[i];
+            message.append(price>inLoadout ? "[red]":"[white]");
+            message.append(inLoadout).append(" [white]/ ").append(price).append(MyPlugin.itemIcons[i]).append("\n");
         }
         message.append("\n[red]!!![white]Factory will take resources form loadout not from a core[red]!!![white]");
         return message.toString();

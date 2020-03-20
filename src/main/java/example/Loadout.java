@@ -63,11 +63,17 @@ public class Loadout{
         }
         launch_item=picked_item;
         launch_to_core=to_core;
+        Teams.TeamData teamData = state.teams.get(player.getTeam());
+        CoreBlock.CoreEntity core = teamData.cores.first();
+        if(get_transport_amount(launch_item,launch_amount,core,launch_to_core)==0){
+            player.sendMessage("[scarlet]Nothing to transport!");
+            return false;
+        }
         return true;
     }
     public int get_transport_amount(Item item,int amount,CoreBlock.CoreEntity core,boolean to_core){
         if(item==null){
-            return 0;
+            return -1;
         }
         int idx=get_item_index(launch_item);
         int loadout_amount=storage[idx];
@@ -154,7 +160,7 @@ public class Loadout{
             shipReport="[orange]"+launch_amount+" "+launch_item.name+"[white] will arrive in " +
                     time / 60 + "min" + time % 60 + "sec.";
         }else{
-            shipReport="Ship is ready for transport resources.";
+            shipReport="Ship is ready for transport of resources.";
         }
         int idx=0;
         StringBuilder message= new StringBuilder();
