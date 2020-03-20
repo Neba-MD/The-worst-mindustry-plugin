@@ -10,8 +10,10 @@ import mindustry.game.Teams;
 import mindustry.gen.Call;
 import mindustry.plugin.Plugin;
 import mindustry.type.Item;
+import mindustry.type.ItemType;
 import mindustry.world.Block;
 import mindustry.world.blocks.storage.CoreBlock;
+
 import static mindustry.Vars.*;
 
 public class MyPlugin extends Plugin{
@@ -19,6 +21,7 @@ public class MyPlugin extends Plugin{
     Loadout loadout=new Loadout();
     UnitFactory factory=new UnitFactory(loadout);
     Vote vote=new Vote(factory,loadout);
+    static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
 
     int loadout_capacity=1000000;
     static int max_transport=5000;
@@ -63,12 +66,7 @@ public class MyPlugin extends Plugin{
         return false;
     }
     public static boolean verify_item(Item item){
-        return item.name.equals("blast-compound") ||
-                item.name.equals("spore-pod") ||
-                item.name.equals("pyratite") ||
-                item.name.equals("coal") ||
-                item.name.equals("sand") ||
-                item.name.equals("scrap");
+        return item.type!= ItemType.material;
     }
     
     public int get_storage_size() {
@@ -144,7 +142,6 @@ public class MyPlugin extends Plugin{
 
         });
     }
-
     //register commands that player can invoke in-game
     @Override
     public void registerClientCommands(CommandHandler handler){
@@ -176,14 +173,15 @@ public class MyPlugin extends Plugin{
             build_core(cost,player,to_build);
         });
         handler.<Player>register("l-help","Shows better explanation of loadout system.",
-                (arg,player)-> player.sendMessage("Loadout is storage in your home base.You can launch resources " +
+                (arg,player)-> player.sendMessage("l=Loadout is storage in your home base.You can launch resources " +
                         "and save them for later use.When using resources from Loadout it takes some time for spaceships " +
                         "to arrive with resource,but you can always launch.Other players have to agree with loadout use."));
 
         handler.<Player>register("l-info","Shows how may resource you have stored in the loadout."
                 ,(arg, player) -> {
-            player.sendMessage("[orange]loadout STATE");
-            loadout.info(player);
+            String message="[orange]LOADOUT INFO\n";
+            message+=loadout.info();
+            Call.onInfoMessage(player.con,message);
         });
 
         handler.<Player>register("l-use","<item> <amount>","Uses loadout resources up to [orange]"+
@@ -199,6 +197,11 @@ public class MyPlugin extends Plugin{
                 vote.launch_Vote(player,"fill");
             }
         });
+        handler.<Player>register("f-help","Shows better explanation of factory system.",(arg,player)->{
+            player.sendMessage("f=Factory is on our home base.Its capable of building advanced units,storing them in " +
+                    "hangar or sending then to your position.It can build lich,reaper and eradicator for a reasonable " +
+                    "amount of resources.Be aware of that factory can use only resources in loadout.");
+                });
 
         handler.<Player>register("f-build","<unitName>","Sends build request to factory that will then build " +
                 "unit from loadout resources and send it to us.",(arg, player) -> {
@@ -210,7 +213,7 @@ public class MyPlugin extends Plugin{
 
         handler.<Player>register("f-info","Displays traveling and building progress of units."
                 , (arg, player) ->{
-            player.sendMessage("[orange]FACTORY STATE");
+            player.sendMessage("[orange]FACTORY INFO");
             factory.info(player);
                 });
 
@@ -220,5 +223,11 @@ public class MyPlugin extends Plugin{
                 vote.build_Vote(player,"release",arg[0]);
             }
         });
+        handler.<Player>register("f-price-of" ,"<unit-name>","Displays priceing of units."
+                ,(arg, player) ->{
+            String message=factory.price(player,arg[0]);
+            if (message==null){return;}
+            Call.onInfoMessage(player.con,message);
+                });
     }
 }

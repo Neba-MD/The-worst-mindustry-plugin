@@ -128,24 +128,7 @@ public class UnitFactory {
         return null;
     }
 
-    public void info(Player player) {
-        boolean inProgress=false;
-        for (Build_request b : requests) {
-            inProgress=b.info(player);
-        }
-        if(!inProgress){
-            player.sendMessage("Factory is not building anything nor is any unit travelling.");
-        }
-        if(traveling){
-            player.sendMessage("Units will arrive in " +
-                    time / 60 + "min" + time % 60 + "sec.");
-        }else{
-            player.sendMessage("No units are traveling currently.");
-        }
 
-        player.sendMessage("There are "+unitStats.get(LICH)[unitCount]+" lichs, "+unitStats.get(REAP)[unitCount]+
-                " reapers and "+unitStats.get(ERAD)[unitCount]+" eradicators in a hangar.");
-    }
 
     public void interrupted() {
         interrupted = true;
@@ -223,6 +206,38 @@ public class UnitFactory {
         }
         Build_request b = new Build_request(unitName,unitStats.get(unitName)[buildTimeIdx] * 60, this);
         requests.add(b);
+    }
+    public void info(Player player) {
+        boolean inProgress=false;
+        for (Build_request b : requests) {
+            inProgress=b.info(player);
+        }
+        if(!inProgress){
+            player.sendMessage("Factory is not building anything nor is any unit travelling.");
+        }
+        if(traveling){
+            player.sendMessage("Units will arrive in " +
+                    time / 60 + "min" + time % 60 + "sec.");
+        }else{
+            player.sendMessage("No units are traveling currently.");
+        }
+
+        player.sendMessage("There are "+unitStats.get(LICH)[unitCount]+" lichs, "+unitStats.get(REAP)[unitCount]+
+                " reapers and "+unitStats.get(ERAD)[unitCount]+" eradicators in a hangar.");
+    }
+    public String price(Player player,String unitName){
+        if (!unitName.equals(REAP) && !unitName.equals(LICH)  && !unitName.equals(ERAD)) {
+            player.sendMessage("there is no [red]" + unitName + "[white] only reaper,lich and eradicator.");
+            return null;
+        }
+        StringBuilder message= new StringBuilder();
+        message.append("[orange]").append(unitName.toUpperCase()).append("[white]").append("\n\n");
+        for(int i=0;i<10;i++){
+            message.append(unitStats.get(unitName)[i]).append(MyPlugin.itemIcons[i]).append("\n");
+        }
+        message.append("\n[red]!!![white]Factory will take resources form loadout not from a core[red]!!![white]");
+        return message.toString();
+
     }
 }
 

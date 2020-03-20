@@ -148,24 +148,27 @@ public class Loadout{
         }
     }
 
-    public void info(Player player){
+    public String info(){
+        String shipReport="";
         if( transporting){
-            player.sendMessage("[orange]"+launch_amount+" "+launch_item.name+"[white] will arrive in " +
-                    time / 60 + "min" + time % 60 + "sec.");
+            shipReport="[orange]"+launch_amount+" "+launch_item.name+"[white] will arrive in " +
+                    time / 60 + "min" + time % 60 + "sec.";
         }else{
-            player.sendMessage("Ship is ready for transport resources.");
+            shipReport="Ship is ready for transport resources.";
         }
         int idx=0;
         StringBuilder message= new StringBuilder();
+        message.append("\n");
         for(Item item:content.items()){
             if(MyPlugin.verify_item(item)){continue;}
             message.append(storage[idx] != capacity ? "[white]" : "[green]");
-            message.append(item.name).append(":").append(storage[idx]).append(" ");
+            message.append(storage[idx]).append(MyPlugin.itemIcons[idx]).append("\n");
             idx++;
         }
-        player.sendMessage(message.toString());
+        message.append("[white]\n");
+        message.append(shipReport);
+        return message.toString();
     }
-
     public void interrupted() {
         interrupted=true;
     }
