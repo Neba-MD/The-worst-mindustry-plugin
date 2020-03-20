@@ -187,14 +187,14 @@ public class MyPlugin extends Plugin{
         handler.<Player>register("l-use","<item> <amount>","Uses loadout resources up to [orange]"+
                 max_transport+"[white].",(arg, player) -> {
             if (loadout.set_transport_inf(arg[0], arg[1],player,false,true)){
-                vote.launch_Vote(player,"use");
+                vote.loadout_Vote(player,"use");
             }
         });
 
         handler.<Player>register("l-fill","<item/all> <amount>","Fills loadout with resources " +
                 "from core up to [orange]"+loadout_capacity+" [white]for each resource",(arg, player) -> {
             if (loadout.set_transport_inf(arg[0],arg[1],player,true,false)){
-                vote.launch_Vote(player,"fill");
+                vote.loadout_Vote(player,"fill");
             }
         });
         handler.<Player>register("f-help","Shows better explanation of factory system.",(arg,player)->{
@@ -208,7 +208,7 @@ public class MyPlugin extends Plugin{
             if(!factory.verify_request(player,arg[0])) {
                 return;
             }
-            vote.build_Vote(player,"build",arg[0]);
+            vote.factory_Vote(player,"build",arg[0]);
         });
 
         handler.<Player>register("f-info","Displays traveling and building progress of units."
@@ -220,7 +220,7 @@ public class MyPlugin extends Plugin{
         handler.<Player>register("f-release","<unit/all>","Sends all units or only specified type " +
                 "to your position.",(arg, player) -> {
             if (factory.verify_deployment(player,arg[0])){
-                vote.build_Vote(player,"release",arg[0]);
+                vote.factory_Vote(player,"release",arg[0]);
             }
         });
         handler.<Player>register("f-price-of" ,"<unit-name>","Displays priceing of units."

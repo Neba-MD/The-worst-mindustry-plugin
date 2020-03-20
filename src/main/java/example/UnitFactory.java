@@ -232,7 +232,7 @@ public class UnitFactory {
         }
         StringBuilder message= new StringBuilder();
         message.append("[orange]").append(unitName.toUpperCase()).append("[white]").append("\n\n");
-        message.append("in loadout / price    \n");
+        message.append("in loadout / price\n");
         for(int i=0;i<10;i++){
             int inLoadout=loadout.storage[i];
             int price=unitStats.get(unitName)[i];

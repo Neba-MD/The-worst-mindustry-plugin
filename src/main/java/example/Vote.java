@@ -34,13 +34,13 @@ public class Vote {
         return isvoting;
     }
 
-    void launch_Vote(Player player, String type) {
+    void loadout_Vote(Player player, String type) {
         if(check()){return;}
         this.player = player;
         this.type = type;
         command();
     }
-    void build_Vote(Player player,String type,String unitType) {
+    void factory_Vote(Player player,String type,String unitType) {
         if(check()){return;}
         this.player = player;
         this.type = type;

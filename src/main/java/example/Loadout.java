@@ -155,9 +155,9 @@ public class Loadout{
     }
 
     public String info(){
-        String shipReport="";
+        String shipReport;
         if( transporting){
-            shipReport="[orange]"+launch_amount+" "+launch_item.name+"[white] will arrive in " +
+            shipReport="[orange]"+(launch_item==null ? "all":(launch_amount+" "+launch_item.name))+"[white] will arrive in " +
                     time / 60 + "min" + time % 60 + "sec.";
         }else{
             shipReport="Ship is ready for transport of resources.";
