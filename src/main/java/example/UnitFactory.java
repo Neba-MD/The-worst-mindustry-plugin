@@ -155,7 +155,7 @@ public class UnitFactory {
 
     public void send_units(Player player,String unitName){
         traveling=true;
-        Call.sendMessage("[green]"+unitName+" were launched from hangar to "+player.name+"s position.");
+        Call.sendMessage("[green]"+unitName+" were launched from hangar to "+player.name+"s position.It will arrive in "+MyPlugin.transport_time+"min.");
         ArrayList<BaseUnit> units=new ArrayList<>();
         switch (unitName) {
             case LICH:
