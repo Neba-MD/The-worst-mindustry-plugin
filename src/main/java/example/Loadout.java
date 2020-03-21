@@ -114,9 +114,11 @@ public class Loadout{
         int idx=get_item_index(launch_item);
         int amount=get_transport_amount(launch_item,launch_amount,core,launch_to_core);
         String message=(launch_item==null ? "all" : amount +" "+launch_item.name);
+
         if(launch_to_core){
             storage[idx]-=amount;
             transporting=true;
+            interrupted=false;
             time=MyPlugin.transport_time;
             launch_amount=amount;
             Timer.schedule(new TimerTask() {

@@ -51,6 +51,9 @@ public class Vote {
         if(isvoting){
             player.sendMessage("vote-in-processing");
             return true;
+        }if(MyPlugin.pending_gameover){
+            player.sendMessage("gameower,wait");
+            return true;
         }
         return false;
     }

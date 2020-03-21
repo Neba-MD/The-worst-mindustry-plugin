@@ -24,7 +24,7 @@ public class MyPlugin extends Plugin{
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
     static int max_transport=5000;
     static int transport_time=5*60;
-    
+    static boolean pending_gameover=false;
 
     public MyPlugin(){
 
@@ -39,6 +39,9 @@ public class MyPlugin extends Plugin{
             }
         });
         Events.on(EventType.GameOverEvent.class,e-> interrupted());
+        Events.on(EventType.WorldLoadEvent.class,e->{
+            pending_gameover=false;
+        });
         /*Events.on(BuildSelectEvent.class, event -> {
             if(!event.breaking && event.builder != null && event.builder.buildRequest() != null && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player){
                 //send a message to everyone saying that this player has begun building a reactor
@@ -47,6 +50,7 @@ public class MyPlugin extends Plugin{
         });*/
         }
     private void interrupted() {
+        pending_gameover=true;
         factory.interrupted();
         vote.interrupted();
         loadout.interrupted();

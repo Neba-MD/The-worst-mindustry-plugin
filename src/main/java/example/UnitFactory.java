@@ -173,6 +173,7 @@ public class UnitFactory {
                 add_units(ERAD,units,player);
                 break;
         }
+        interrupted=false;
         time= MyPlugin.transport_time;
         Timer.schedule(()->{
             if(interrupted){
