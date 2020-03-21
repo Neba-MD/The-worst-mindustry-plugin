@@ -34,6 +34,7 @@ public class Loadout{
     }
 
     public boolean set_transport_inf(String sItem,String sAmount,Player player,boolean can_all,boolean to_core){
+        launch_to_core=to_core;
         if(transporting){
             player.sendMessage("[orange]"+launch_amount+" "+launch_item.name+"[white] is currently being transported." +
                     "you have to wait " + time / 60 + "min" + time % 60 + "sec for it to arrive.");
@@ -62,7 +63,7 @@ public class Loadout{
             return false;
         }
         launch_item=picked_item;
-        launch_to_core=to_core;
+
         Teams.TeamData teamData = state.teams.get(player.getTeam());
         CoreBlock.CoreEntity core = teamData.cores.first();
         if(get_transport_amount(launch_item,launch_amount,core,launch_to_core)==0){
@@ -130,6 +131,7 @@ public class Loadout{
                 if(interrupted){
                     Call.sendMessage("Base is gone ,[orange]"+message+"[white] going back to loadout.");
                     storage[idx]+=amount;
+                    interrupted=false;
                     return;
                 }
                 core.items.add(finalItem,amount);
