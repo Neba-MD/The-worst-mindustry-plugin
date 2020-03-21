@@ -22,13 +22,12 @@ public class MyPlugin extends Plugin{
     UnitFactory factory=new UnitFactory(loadout);
     Vote vote=new Vote(factory,loadout);
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
-
-    int loadout_capacity=1000000;
     static int max_transport=5000;
     static int transport_time=5*60;
     
 
     public MyPlugin(){
+
         Events.on(EventType.PlayerChatEvent.class, e -> {
             String check = String.valueOf(e.message.charAt(0));
             if (!check.equals("/") && vote.isIsvoting()) {
@@ -138,7 +137,7 @@ public class MyPlugin extends Plugin{
                 return;
             }
             max_transport=Integer.parseInt(args[0]);
-            Log.info("Transport time wos set.");
+            Log.info("Max transport wos set.");
 
         });
     }
@@ -150,7 +149,6 @@ public class MyPlugin extends Plugin{
             Teams.TeamData teamData = state.teams.get(player.getTeam());
             CoreBlock.CoreEntity core = teamData.cores.first();
             for(Item item:content.items()){
-
                 if(verify_item(item)){continue;}
                 core.items.add(item, 40000);
             }
@@ -185,23 +183,23 @@ public class MyPlugin extends Plugin{
         });
 
         handler.<Player>register("l-use","<item> <amount>","Uses loadout resources up to [orange]"+
-                max_transport+"[white].",(arg, player) -> {
+               max_transport+"[white].",(arg, player) -> {
             if (loadout.set_transport_inf(arg[0], arg[1],player,false,true)){
                 vote.loadout_Vote(player,"use");
             }
         });
 
         handler.<Player>register("l-fill","<item/all> <amount>","Fills loadout with resources " +
-                "from core up to [orange]"+loadout_capacity+" [white]for each resource",(arg, player) -> {
+                "from core up to [orange]"+loadout.capacity+" [white]for each resource",(arg, player) -> {
             if (loadout.set_transport_inf(arg[0],arg[1],player,true,false)){
                 vote.loadout_Vote(player,"fill");
             }
         });
-        handler.<Player>register("f-help","Shows better explanation of factory system.",(arg,player)->{
-            player.sendMessage("f=Factory is on our home base.Its capable of building advanced units,storing them in " +
-                    "hangar or sending then to your position.It can build lich,reaper and eradicator for a reasonable " +
-                    "amount of resources.Be aware of that factory can use only resources in loadout.");
-                });
+        handler.<Player>register("f-help","Shows better explanation of factory system.",
+                (arg,player)-> player.sendMessage(
+                        "f=Factory is on our home base.Its capable of building advanced units,storing them in " +
+                "hangar or sending then to your position.It can build lich,reaper and eradicator for a reasonable " +
+                "amount of resources.Be aware of that factory can use only resources in loadout."));
 
         handler.<Player>register("f-build","<unitName>","Sends build request to factory that will then build " +
                 "unit from loadout resources and send it to us.",(arg, player) -> {

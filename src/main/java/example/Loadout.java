@@ -124,6 +124,7 @@ public class Loadout{
                     time--;
                 }
             },0,1,time-1);
+            Item finalItem=launch_item;
             Timer.schedule(()->{
                 transporting=false;
                 if(interrupted){
@@ -131,7 +132,7 @@ public class Loadout{
                     storage[idx]+=amount;
                     return;
                 }
-                core.items.add(launch_item,amount);
+                core.items.add(finalItem,amount);
                 Call.sendMessage("[green]"+message+" arrived to core");
             },time);
         }else{
