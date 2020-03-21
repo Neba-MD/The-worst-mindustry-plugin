@@ -176,7 +176,7 @@ public class UnitFactory {
         time= MyPlugin.transport_time;
         Timer.schedule(()->{
             if(interrupted){
-                Call.sendChatMessage("Units were sent back to hangar.");
+                Call.sendMessage("Units arrived but there in nothing to fight fore anymore.");
                 traveling=false;
                 interrupted=false;
                 return;
