@@ -149,14 +149,14 @@ public class MyPlugin extends Plugin{
     @Override
     public void registerClientCommands(CommandHandler handler){
 
-        handler.<Player>register("add","add items",(args,player)->{
+        /*handler.<Player>register("add","add items",(args,player)->{
             Teams.TeamData teamData = state.teams.get(player.getTeam());
             CoreBlock.CoreEntity core = teamData.cores.first();
             for(Item item:content.items()){
                 if(verify_item(item)){continue;}
                 core.items.add(item, 40000);
             }
-        });
+        });*/
 
         handler.<Player>register("build-core","<small/normal/big>", "Makes new core", (arg, player) -> {
             // Core type
