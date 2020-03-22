@@ -1,15 +1,15 @@
 
 package example;
 
+import arc.struct.Array;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
 import mindustry.entities.type.Player;
 import mindustry.gen.Call;
 import mindustry.type.Item;
 import static mindustry.Vars.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TimerTask;
+
+import java.util.*;
 
 import arc.util.Timer;
 
@@ -242,6 +242,22 @@ public class UnitFactory {
         message.append("\n[red]!!![white]Factory will take resources form loadout not from a core[red]!!![white]");
         return message.toString();
 
+    }
+
+    public String get_data() {
+        StringBuilder data= new StringBuilder();
+        for(int[] stat:unitStats.values()){
+            data.append(stat[unitCount]).append("/");
+        }
+        return data.toString();
+    }
+    public void load_data(String facData){
+        int idx=0;
+        String[] vals=facData.split("/");
+        for(int[] stat:unitStats.values()){
+            stat[unitCount]=Integer.parseInt(vals[idx]);
+            idx++;
+        }
     }
 }
 

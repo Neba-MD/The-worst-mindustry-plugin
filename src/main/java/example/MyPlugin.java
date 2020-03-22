@@ -3,6 +3,7 @@ package example;
 import arc.Events;
 import arc.util.CommandHandler;
 import arc.util.Log;
+import arc.util.Timer;
 import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
 import mindustry.game.EventType;
@@ -27,10 +28,12 @@ public class MyPlugin extends Plugin{
     static int max_transport=5000;
     static int transport_time=5*60;
     static boolean pending_gameover=false;
+    int autoSaveFrequency=1;
 
     public MyPlugin(){
         load_data();
-
+        Log.info("Saves once a "+autoSaveFrequency+"min.");
+        autoSave();
         Events.on(EventType.PlayerChatEvent.class, e -> {
             String check = String.valueOf(e.message.charAt(0));
             if (!check.equals("/") && vote.isIsvoting()) {
@@ -92,6 +95,13 @@ public class MyPlugin extends Plugin{
         }
 
     }
+    private void autoSave(){
+        Timer.schedule(()->{
+            save_data();
+            autoSave();
+        },autoSaveFrequency*60);
+    }
+
 
     public static boolean isNotInteger(String str) {
         if(str == null || str.trim().isEmpty()) {
@@ -166,7 +176,15 @@ public class MyPlugin extends Plugin{
                 save_data());
         handler.register("load-myplugin-data","loads save data if there is any.",args->
                 load_data());
-        handler.register("set-trans-time","<seconds>","Sets the ladout-usees cooldown.",args->
+        handler.register("set-save-freq","<minutes>","sets autosave s frequency.",args->{
+            if(isNotInteger(args[0])){
+                Log.info("You have to write an integer Neba!");
+                return;
+            }
+            autoSaveFrequency=Integer.parseInt(args[0]);
+            Log.info("Autosave frequency wos set.");
+        });
+        handler.register("set-trans-time","<seconds>","Sets the loadout-use cool down.",args->
         {
             if(isNotInteger(args[0])){
                 Log.info("You have to write an integer Neba!");
