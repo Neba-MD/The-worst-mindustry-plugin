@@ -27,21 +27,16 @@ public class MyPlugin extends Plugin{
     static boolean pending_gameover=false;
 
     public MyPlugin(){
-
         Events.on(EventType.PlayerChatEvent.class, e -> {
             String check = String.valueOf(e.message.charAt(0));
             if (!check.equals("/") && vote.isIsvoting()) {
                 if (e.message.equals("y")) {
                     vote.add_vote(e.player, 1);
-                } else if (e.message.equals("n")) {
-                    vote.add_vote(e.player, 1);
                 }
             }
         });
         Events.on(EventType.GameOverEvent.class,e-> interrupted());
-        Events.on(EventType.WorldLoadEvent.class,e->{
-            pending_gameover=false;
-        });
+        Events.on(EventType.WorldLoadEvent.class,e-> pending_gameover=false);
         /*Events.on(BuildSelectEvent.class, event -> {
             if(!event.breaking && event.builder != null && event.builder.buildRequest() != null && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player){
                 //send a message to everyone saying that this player has begun building a reactor
@@ -49,10 +44,13 @@ public class MyPlugin extends Plugin{
             }
         });*/
         }
+
     private void interrupted() {
         pending_gameover=true;
         factory.interrupted();
-        vote.interrupted();
+        if(vote.isIsvoting()) {
+            vote.cancel();
+        }
         loadout.interrupted();
     }
 
@@ -68,6 +66,7 @@ public class MyPlugin extends Plugin{
         }
         return false;
     }
+
     public static boolean verify_item(Item item){
         return item.type!= ItemType.material;
     }
@@ -88,6 +87,7 @@ public class MyPlugin extends Plugin{
         }
         return res;
     }
+
     public void build_core(int cost,Player player,Block core_tipe){
         boolean can_build=true;
         Teams.TeamData teamData = state.teams.get(player.getTeam());
@@ -157,6 +157,7 @@ public class MyPlugin extends Plugin{
                 core.items.add(item, 40000);
             }
         });
+
         handler.<Player>register("build-core","<small/normal/big>", "Makes new core", (arg, player) -> {
             // Core type
             int storage= get_storage_size();
@@ -174,6 +175,7 @@ public class MyPlugin extends Plugin{
             }
             build_core(cost,player,to_build);
         });
+
         handler.<Player>register("l-help","Shows better explanation of loadout system.",
                 (arg,player)-> player.sendMessage("l=Loadout is storage in your home base.You can launch resources " +
                         "and save them for later use.When using resources from Loadout it takes some time for spaceships " +
@@ -199,6 +201,7 @@ public class MyPlugin extends Plugin{
                 vote.loadout_Vote(player,"fill");
             }
         });
+        
         handler.<Player>register("f-help","Shows better explanation of factory system.",
                 (arg,player)-> player.sendMessage(
                         "f=Factory is on our home base.Its capable of building advanced units,storing them in " +

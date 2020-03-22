@@ -72,6 +72,7 @@ public class Loadout{
         }
         return true;
     }
+    
     public int get_transport_amount(Item item,int amount,CoreBlock.CoreEntity core,boolean to_core){
         if(item==null){
             return -1;
@@ -97,6 +98,7 @@ public class Loadout{
         }
         return amount;
     }
+
     public int get_item_index(Item item){
         int idx=0;
         for(Item _item:content.items()) {
@@ -108,6 +110,7 @@ public class Loadout{
         }
         return idx;
     }
+
     public void use_loadout(Player player){
         Teams.TeamData teamData = state.teams.get(player.getTeam());
         CoreBlock.CoreEntity core = teamData.cores.first();

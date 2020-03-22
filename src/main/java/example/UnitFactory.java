@@ -145,8 +145,6 @@ public class UnitFactory {
                 break;
         }
         for(int i=0;i<unitStats.get(unitName)[unitCount];i++){
-
-
             unit.set(player.x,player.y);
             units.add(unit);
         }
@@ -155,7 +153,7 @@ public class UnitFactory {
 
     public void send_units(Player player,String unitName){
         traveling=true;
-        Call.sendMessage("[green]"+unitName+" were launched from hangar to "+player.name+"s position.It will arrive in "+MyPlugin.transport_time+"min.");
+        Call.sendMessage("[green]"+unitName+" were launched from hangar to "+player.name+"s position.It will arrive in "+MyPlugin.transport_time/60+"min.");
         ArrayList<BaseUnit> units=new ArrayList<>();
         switch (unitName) {
             case LICH:
@@ -176,16 +174,15 @@ public class UnitFactory {
         interrupted=false;
         time= MyPlugin.transport_time;
         Timer.schedule(()->{
+            traveling=false;
             if(interrupted){
-                Call.sendMessage("Units arrived but there in nothing to fight fore anymore.");
-                traveling=false;
+                Call.sendMessage("Units arrived but there in nothing to fight for anymore.");
                 interrupted=false;
                 return;
             }
             for(BaseUnit unit:units){
                unit.add();
             }
-            traveling=false;
         },time);
         Timer.schedule(new TimerTask() {
             @Override
@@ -208,6 +205,7 @@ public class UnitFactory {
         Build_request b = new Build_request(unitName,unitStats.get(unitName)[buildTimeIdx] * 60, this);
         requests.add(b);
     }
+
     public void info(Player player) {
         boolean inProgress=false;
         for (Build_request b : requests) {
@@ -226,6 +224,7 @@ public class UnitFactory {
         player.sendMessage("There are "+unitStats.get(LICH)[unitCount]+" lichs, "+unitStats.get(REAP)[unitCount]+
                 " reapers and "+unitStats.get(ERAD)[unitCount]+" eradicators in a hangar.");
     }
+
     public String price(Player player,String unitName){
         if (!unitName.equals(REAP) && !unitName.equals(LICH)  && !unitName.equals(ERAD)) {
             player.sendMessage("there is no [red]" + unitName + "[white] only reaper,lich and eradicator.");

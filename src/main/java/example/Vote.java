@@ -19,7 +19,6 @@ public class Vote {
     int bundletime = 0;
 
     boolean isvoting = false;
-    boolean interrupted=false;
 
     String[] bundlename = {"vote-50sec", "vote-40sec", "vote-30sec", "vote-20sec", "vote-10sec"};
     ArrayList<String> list = new ArrayList<>();
@@ -168,8 +167,5 @@ public class Vote {
         } else {
             Call.sendMessage("[orange]" + require + " [white]more votes needed.");
         }
-    }
-    public void interrupted() {
-       interrupted = true;
     }
 }

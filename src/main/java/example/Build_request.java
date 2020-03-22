@@ -22,6 +22,7 @@ public class Build_request{
         this.factory=factory;
         start_countdown();
     }
+
     public boolean info(Player player){
         if (building){
             player.sendMessage("Factory is currently building [orange]" + unitName + "[white].It will be finished in " +
