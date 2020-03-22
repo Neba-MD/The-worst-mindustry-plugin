@@ -15,7 +15,7 @@ import static mindustry.Vars.state;
 public class Loadout{
     Item launch_item;
     
-    int[] storage =new int[20];
+    int[] storage =new int[10];
     int capacity =1000000;
     int launch_amount=0;
     int time;
@@ -72,12 +72,12 @@ public class Loadout{
         }
         return true;
     }
-    
+
     public int get_transport_amount(Item item,int amount,CoreBlock.CoreEntity core,boolean to_core){
         if(item==null){
             return -1;
         }
-        int idx=get_item_index(launch_item);
+        int idx=get_item_index(item);
         int loadout_amount=storage[idx];
         int core_amount=core.items.get(item);
         if (to_core){
@@ -103,7 +103,7 @@ public class Loadout{
         int idx=0;
         for(Item _item:content.items()) {
             if(MyPlugin.verify_item(_item)){continue;}
-            if (launch_item==_item) {
+            if (item==_item) {
                 break;
             }
             idx++;
@@ -185,5 +185,23 @@ public class Loadout{
     }
     public void interrupted() {
         interrupted=true;
+    }
+
+    public String get_data() {
+        StringBuilder data = new StringBuilder();
+        for(int i:storage){
+            data.append(i).append("/");
+        }
+        return data.toString();
+    }
+
+    public void load_data(String readLine){
+        int idx=0;
+        for(String num:readLine.split("/")){
+            if (idx<storage.length){
+            storage[idx]=Integer.parseInt(num);
+            }
+            idx++;
+        }
     }
 }

@@ -14,10 +14,12 @@ import mindustry.type.ItemType;
 import mindustry.world.Block;
 import mindustry.world.blocks.storage.CoreBlock;
 
+import java.io.*;
+
 import static mindustry.Vars.*;
 
 public class MyPlugin extends Plugin{
-
+    private final String filename="myPluginData.txt";
     Loadout loadout=new Loadout();
     UnitFactory factory=new UnitFactory(loadout);
     Vote vote=new Vote(factory,loadout);
@@ -27,6 +29,8 @@ public class MyPlugin extends Plugin{
     static boolean pending_gameover=false;
 
     public MyPlugin(){
+        load_data();
+
         Events.on(EventType.PlayerChatEvent.class, e -> {
             String check = String.valueOf(e.message.charAt(0));
             if (!check.equals("/") && vote.isIsvoting()) {
@@ -54,6 +58,40 @@ public class MyPlugin extends Plugin{
         loadout.interrupted();
     }
 
+    private void load_data() {
+        try {
+            FileReader fileReader = new FileReader(filename);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String lodData=bufferedReader.readLine();
+            loadout.load_data(lodData);
+            String facData=bufferedReader.readLine();
+            factory.load_data(facData);
+            bufferedReader.close();
+            Log.info("Data loaded."+lodData+"---"+facData);
+        }catch (FileNotFoundException ex){
+            Log.info("No saves found.");
+        }catch (IOException ex){
+            Log.info("Error when loading data from "+filename+".");
+        }
+
+    }
+    private void save_data(){
+        try {
+            String lodData = loadout.get_data();
+            String facData = factory.get_data();
+            FileWriter fileWriter = new FileWriter(filename);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(lodData);
+            bufferedWriter.newLine();
+            bufferedWriter.write(facData);
+            bufferedWriter.newLine();
+            bufferedWriter.close();
+            Log.info("Data saved."+lodData+"---"+facData);
+        }catch (IOException ex){
+            Log.info("Error when saving data.");
+        }
+
+    }
 
     public static boolean isNotInteger(String str) {
         if(str == null || str.trim().isEmpty()) {
@@ -124,6 +162,10 @@ public class MyPlugin extends Plugin{
             Log.info("start");
             Log.info("finish");
                 });
+        handler.register("save-myplugin-data","saves loadout and factory progress immediately.",args->
+                save_data());
+        handler.register("load-myplugin-data","loads save data if there is any.",args->
+                load_data());
         handler.register("set-trans-time","<seconds>","Sets the ladout-usees cooldown.",args->
         {
             if(isNotInteger(args[0])){
@@ -149,14 +191,14 @@ public class MyPlugin extends Plugin{
     @Override
     public void registerClientCommands(CommandHandler handler){
 
-        /*handler.<Player>register("add","add items",(args,player)->{
+        handler.<Player>register("add","add items",(args,player)->{
             Teams.TeamData teamData = state.teams.get(player.getTeam());
             CoreBlock.CoreEntity core = teamData.cores.first();
             for(Item item:content.items()){
                 if(verify_item(item)){continue;}
                 core.items.add(item, 40000);
             }
-        });*/
+        });
 
         handler.<Player>register("build-core","<small/normal/big>", "Makes new core", (arg, player) -> {
             // Core type
