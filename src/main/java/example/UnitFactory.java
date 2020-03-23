@@ -23,9 +23,9 @@ public class UnitFactory {
     HashMap<String, int[]> unitStats = new HashMap<>();
     ArrayList<Build_request> requests = new ArrayList<>();
 
-    int[] reaperCost = {10000, 10000, 4000, 3000, 5000, 1000, 5000, 500, 500, 500, 1, 0};
+    int[] reaperCost = {10000, 10000, 4000, 3000, 5000, 1000, 5000, 500, 500, 500, 2, 0};
     int[] lichCost = {5000, 5000, 2000, 1500, 2500, 500, 2500, 250, 250, 250, 1, 0};
-    int[] eradCost = {15000, 15000, 1000, 5000, 10000, 5000, 1000, 1000, 1000, 1000, 1, 0};
+    int[] eradCost = {20000, 20000, 8000, 6000, 10000, 5000, 10000, 2000, 2000, 2000, 5, 0};
 
     int time=0;
 
@@ -175,7 +175,7 @@ public class UnitFactory {
         Timer.schedule(()->{
             traveling=false;
             if(interrupted){
-                Call.sendMessage("[scarlet][Server][]Units arrived but there in nothing to fight for anymore.");
+                Call.sendMessage("[scarlet][Server][]" +unitName+ " arrived to the destination, killed everything in sight but still wondering where everyone is.");
                 interrupted=false;
                 return;
             }
@@ -246,7 +246,7 @@ public class UnitFactory {
             message.append(price>inLoadout ? "[red]":"[white]");
             message.append(inLoadout).append(" [white]/ ").append(price).append(MyPlugin.itemIcons[i]).append("\n");
         }
-        message.append("\n[red]!!![white]Factory will take resources form loadout not from a core[red]!!![white]\n");
+        message.append("\n[red]!!![white]Factory will take resources from loadout not from the core[red]!!![white]\n");
         message.append("Build time: [orange]").append(unitStats.get(unitName)[buildTimeIdx]).append(".");
         return message.toString();
 

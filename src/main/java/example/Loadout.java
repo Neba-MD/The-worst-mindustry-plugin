@@ -183,7 +183,7 @@ public class Loadout{
         message.append(shipReport);
         return message.toString();
     }
-    
+
     public void interrupted() {
         interrupted=true;
     }

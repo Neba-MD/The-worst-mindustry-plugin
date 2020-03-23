@@ -53,7 +53,7 @@ public class Vote {
             player.sendMessage("[scarlet][Server][]vote-in-processing");
             return true;
         }if(MyPlugin.pending_gameover){
-            player.sendMessage("[scarlet][Server][]Game over,wait.");
+            player.sendMessage("[scarlet][Server][]Game is over. Please wait!");
             return true;
         }
         return false;
@@ -114,20 +114,20 @@ public class Vote {
                 require = (int) Math.ceil((double) playerGroup.size() / 2);
             }
             String message = loadout.launch_amount + " " + (loadout.launch_item == null ? " of every resource" : loadout.launch_item.name);
-            switch (type) {
-                case "use":
-                    Call.sendMessage("[scarlet][Server][]vote-to launch [orange]" + message + "[white] to core.Open chat window and sey [orange]'y' [white]to agree.");
-                    break;
-                case "fill":
-                    Call.sendMessage("[scarlet][Server][]vote-to launch [orange]" + message + "[white] to loadout.Open chat window and sey [orange]'y' [white]to agree.");
-                    break;
-                case "build":
-                    Call.sendMessage("[scarlet][Server][]vote-to build [orange]" +unitType+ "[white].Open chat window and sey [orange]'y' [white]to agree.");
-                    break;
-                case "release":
-                    Call.sendMessage("[scarlet][Server][]vote-to launch [orange]" +unitType+ "[white] units.Open chat window and sey [orange]'y' [white]to agree.");
-                    break;
-            }
+        switch (type) {
+            case "use":
+                Call.sendMessage("[scarlet][Server][orange] " +player.name+ "[] has casted vote to launch [orange]" + message + "[] to core. Open chat window and say [orange]'y' [white]to agree.");
+                break;
+            case "fill":
+                Call.sendMessage("[scarlet][Server][orange] " +player.name+ "[] has casted vote to launch [orange]" + message + "[] to loadout. Open chat window and say [orange]'y' [white]to agree.");
+                break;
+            case "build":
+                Call.sendMessage("[scarlet][Server][orange] " +player.name+ "[] has casted vote to build [orange]" +unitType+ "[]. Open chat window and say [orange]'y' [white]to agree.");
+                break;
+            case "release":
+                Call.sendMessage("[scarlet][Server][orange] " +player.name+ "[] has casted vote to launch [orange]" +unitType+ "[] units. Open chat window and say [orange]'y' [white]to agree.");
+                break;
+        }
 
             countdown(voteIdx);
             alert(voteIdx);
