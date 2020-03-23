@@ -152,6 +152,7 @@ public class MyPlugin extends Plugin{
             if (world.tile(player.tileX(), player.tileY()).block() == core_tipe) {
 
                 player.sendMessage("[green]Core spawned!");
+                Call.sendMessage("[scarlet][Server][]Player [green]"+player.name+" []has taken a portion of resources to build a core!");
                 for(Item item:content.items()){
                     if(verify_item(item)){continue;}
                     core.items.remove(item, cost);
@@ -237,9 +238,9 @@ public class MyPlugin extends Plugin{
         });
 
         handler.<Player>register("l-help","Shows better explanation of loadout system.",
-                (arg,player)-> player.sendMessage("l=Loadout is storage in your home base.You can launch resources " +
-                        "and save them for later use.When using resources from Loadout it takes some time for spaceships " +
-                        "to arrive with resource,but you can always launch.Other players have to agree with loadout use."));
+                (arg,player)-> player.sendMessage("l=Loadout is storage in your home base. You can launch resources " +
+                        "and save them for later use. When using resources from Loadout it takes some time for spaceships " +
+                        "to arrive with resource,but you can always launch. Other players have to agree with loadout use."));
 
         handler.<Player>register("l-info","Shows how may resource you have stored in the loadout."
                 ,(arg, player) -> {
@@ -264,9 +265,9 @@ public class MyPlugin extends Plugin{
         
         handler.<Player>register("f-help","Shows better explanation of factory system.",
                 (arg,player)-> player.sendMessage(
-                        "f=Factory is on our home base.Its capable of building advanced units,storing them in " +
-                "hangar or sending then to your position.It can build lich,reaper and eradicator for a reasonable " +
-                "amount of resources.Be aware of that factory can use only resources in loadout."));
+                        "f=Factory is on our home base. Its capable of building advanced units,storing them in " +
+                "hangar or sending then to your position. It can build lich,reaper and eradicator for a reasonable " +
+                "amount of resources. Be aware of that factory can use only resources in loadout."));
 
         handler.<Player>register("f-build","<unitName>","Sends build request to factory that will then build " +
                 "unit from loadout resources and send it to us.",(arg, player) -> {
@@ -288,7 +289,7 @@ public class MyPlugin extends Plugin{
                 vote.factory_Vote(player,"release",arg[0]);
             }
         });
-        handler.<Player>register("f-price-of" ,"<unit-name>","Displays priceing of units."
+        handler.<Player>register("f-price-of" ,"<unit-name>","Displays pricing of units."
                 ,(arg, player) ->{
             String message=factory.price(player,arg[0]);
             if (message==null){return;}

@@ -25,7 +25,7 @@ public class Build_request{
 
     public boolean info(Player player){
         if (building){
-            player.sendMessage("Factory is currently building [orange]" + unitName + "[white].It will be finished in " +
+            player.sendMessage("[scarlet][Server][]Factory is currently building [orange]" + unitName + "[white].It will be finished in " +
                     time / 60 + "min" + time % 60 + "sec.");
             return true;
         }
@@ -34,7 +34,7 @@ public class Build_request{
 
     private void start_countdown() {
         building=true;
-        Call.sendMessage("[green]Building of " + unitName + " just started.It will take " + time / 60 + "min.");
+        Call.sendMessage("[scarlet][Server][][green]Building of " + unitName + " just started.It will take " + time / 60 + "min.");
         TimerTask countdown=new TimerTask() {
             @Override
             public void run() {
@@ -44,7 +44,8 @@ public class Build_request{
         Timer.schedule(countdown,0,1,time-1);
         Timer.schedule(() -> {
             building = false;
-            Call.sendMessage("[green]" + unitName + " is finished and waiting in a hangar.You can use factory egan.");
+
+            Call.sendMessage("[scarlet][Server][][green]" + unitName + " is finished and waiting in a hangar.You can use factory egan.");
             factory.unitStats.get(unitName)[UnitFactory.unitCount]+=1;
         }, time);
     }

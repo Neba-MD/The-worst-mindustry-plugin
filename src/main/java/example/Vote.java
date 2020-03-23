@@ -39,6 +39,7 @@ public class Vote {
         this.type = type;
         command();
     }
+
     void factory_Vote(Player player,String type,String unitType) {
         if(check()){return;}
         this.player = player;
@@ -46,17 +47,17 @@ public class Vote {
         this.unitType=unitType;
         command();
     }
+
     public boolean check(){
         if(isvoting){
-            player.sendMessage("vote-in-processing");
+            player.sendMessage("[scarlet][Server][]vote-in-processing");
             return true;
         }if(MyPlugin.pending_gameover){
-            player.sendMessage("gameower,wait");
+            player.sendMessage("[scarlet][Server][]Game over,wait.");
             return true;
         }
         return false;
     }
-
 
     public void cancel() {
         voteIdx+=1;
@@ -66,34 +67,34 @@ public class Vote {
         switch (type) {
             case "use":
                 if (require <= 0) {
-                    Call.sendMessage("vote-launch to core-done");
+                    Call.sendMessage("[scarlet][Server][]vote-launch to core-done");
                     loadout.use_loadout(player);
                 } else {
-                    Call.sendMessage("vote-launch to core-fail");
+                    Call.sendMessage("[scarlet][Server][]vote-launch to core-fail");
                 }
                 break;
             case "fill":
                 if (require <= 0) {
-                    Call.sendMessage("vote-launch to loadout-done");
+                    Call.sendMessage("[scarlet][Server][]vote-launch to loadout-done");
                     loadout.use_loadout(player);
                 } else {
-                    Call.sendMessage("vote-launch to loadout-fail");
+                    Call.sendMessage("[scarlet][Server][]vote-launch to loadout-fail");
                 }
                 break;
             case "release":
                 if (require <= 0) {
-                    Call.sendMessage("vote-launch of units-done");
+                    Call.sendMessage("[scarlet][Server][]vote-launch of units-done");
                     factory.send_units(player,unitType);
                 } else {
-                    Call.sendMessage("vote-launch of units-fail");
+                    Call.sendMessage("[scarlet][Server][]vote-launch of units-fail");
                 }
                 break;
             case "build":
                 if (require <= 0) {
-                    Call.sendMessage("vote-build "+unitType+"-done");
+                    Call.sendMessage("[scarlet][Server][]vote-build "+unitType+"-done");
                     factory.build_unit(unitType);
                 } else {
-                    Call.sendMessage("vote-build "+unitType+"-fail");
+                    Call.sendMessage("[scarlet][Server][]vote-build "+unitType+"-fail");
                 }
                 break;
 
@@ -115,22 +116,23 @@ public class Vote {
             String message = loadout.launch_amount + " " + (loadout.launch_item == null ? " of every resource" : loadout.launch_item.name);
             switch (type) {
                 case "use":
-                    Call.sendMessage("vote-to launch [orange]" + message + "[white] to core.Open chat window and sey [orange]'y' [white]to agree.");
+                    Call.sendMessage("[scarlet][Server][]vote-to launch [orange]" + message + "[white] to core.Open chat window and sey [orange]'y' [white]to agree.");
                     break;
                 case "fill":
-                    Call.sendMessage("vote-to launch [orange]" + message + "[white] to loadout.Open chat window and sey [orange]'y' [white]to agree.");
+                    Call.sendMessage("[scarlet][Server][]vote-to launch [orange]" + message + "[white] to loadout.Open chat window and sey [orange]'y' [white]to agree.");
                     break;
                 case "build":
-                    Call.sendMessage("vote-to build [orange]" +unitType+ "[white].Open chat window and sey [orange]'y' [white]to agree.");
+                    Call.sendMessage("[scarlet][Server][]vote-to build [orange]" +unitType+ "[white].Open chat window and sey [orange]'y' [white]to agree.");
                     break;
                 case "release":
-                    Call.sendMessage("vote-to launch [orange]" +unitType+ "[white] units.Open chat window and sey [orange]'y' [white]to agree.");
+                    Call.sendMessage("[scarlet][Server][]vote-to launch [orange]" +unitType+ "[white] units.Open chat window and sey [orange]'y' [white]to agree.");
                     break;
             }
 
             countdown(voteIdx);
             alert(voteIdx);
     }
+
     public void countdown(int idx){
         Timer.schedule(()->{
             if (idx!=voteIdx){
@@ -141,13 +143,14 @@ public class Vote {
             }
         },60);
     }
+
     public void alert(int idx){
         Timer.schedule(()->{
             if (idx!=voteIdx){
                 return;
             }
             if (bundletime <= 4) {
-                Call.sendMessage(bundlename[bundletime]);
+                Call.sendMessage("[scarlet][Server][]"+bundlename[bundletime]);
                 bundletime++;
                 alert(idx);
             }
@@ -157,7 +160,7 @@ public class Vote {
 
     public void add_vote(Player player, int vote) {
         if (list.contains(player.uuid)) {
-            player.sendMessage("You already voted,sit down!");
+            player.sendMessage("[scarlet][Server][]You already voted,sit down!");
             return;
         }
         require -= vote;
@@ -165,7 +168,7 @@ public class Vote {
         if (require <= 0) {
             cancel();
         } else {
-            Call.sendMessage("[orange]" + require + " [white]more votes needed.");
+            Call.sendMessage("[scarlet][Server][][orange]" + require + " [white]more votes needed.");
         }
     }
 }

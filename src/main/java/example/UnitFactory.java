@@ -47,12 +47,12 @@ public class UnitFactory {
         String currentUnit = is_building();
         if (currentUnit != null) {
             int time = currentUnitBuildTime();
-            player.sendMessage("Factory is currently building [orange]" + currentUnit + "[white].It will be finished in " +
-                    time / 60 + "min" + time % 60 + "sec.");
+            player.sendMessage("[scarlet][Server][]Factory is currently building [orange]" + unitName +
+                    "[white]. It will be finished in " + time / 60 + "min" + time % 60 + "sec.");
             return false;
         }
         if (!unitName.equals(REAP) && !unitName.equals(LICH) && !unitName.equals(ERAD)) {
-            player.sendMessage("Factory can not build [red]" + unitName + "[white]. It can build oni reaper,lich and eradicator.");
+            player.sendMessage("[scarlet][Server][]Factory cannot build [red]" + unitName + "[]. It can build oni reaper,lich and eradicator.");
             return false;
         }
         boolean can_build = true;
@@ -65,12 +65,12 @@ public class UnitFactory {
             int stored = loadout.storage[idx];
             if (requires > stored) {
                 can_build = false;
-                player.sendMessage("You are missing [red]" + (requires - stored) + " " + item.name + "[white].");
+                player.sendMessage("[scarlet][Server][]You are missing [red]" + (requires - stored) + " " + item.name + "[white].");
             }
             idx++;
         }
         if (!can_build) {
-            player.sendMessage("Not enough resources!");
+            player.sendMessage("[scarlet][Server][]Not enough resources!");
             return false;
         }
         return true;
@@ -87,23 +87,23 @@ public class UnitFactory {
 
     public boolean verify_deployment(Player player, String unitName){
         if(traveling){
-            player.sendMessage("Units are being transported currently.They will arrive in " +
+            player.sendMessage("[scarlet][Server][]Units are being transported currently.They will arrive in " +
                     time / 60 + "min" + time % 60 + "sec.");
             return false;
         }
         if (!unitName.equals(REAP) && !unitName.equals(LICH) && !unitName.equals("all") && !unitName.equals(ERAD)) {
-            player.sendMessage("Factory cannot deploy [red]" + unitName + "[white]. It can deploy oni reaper,lich and eradicator.");
+            player.sendMessage("[scarlet][Server][]Factory cannot deploy [scarlet]" + unitName + "[]. It can deploy oni reaper,lich and eradicator.");
             return false;
         }
         if (get_unit_count(unitName)==0){
-            player.sendMessage("[red]There are "+get_unit_count(unitName)+" of "+unitName+" in hangar.");
+            player.sendMessage("[scarlet][Server][]There are "+get_unit_count(unitName)+" of "+unitName+" in hangar.");
             return false;
         }
         int x = (int) player.x;
         int y = (int) player.y;
         if (world.tile(x / 8, y / 8).solid()) {
             if (  unitName.equals("all") || unitName.equals(ERAD) ) {
-                player.sendMessage("Land unit cant be dropped on a solid block.");
+                player.sendMessage("[scarlet][Server][]Land unit cant be dropped on a solid block.");
                 return false;
             }
         }
@@ -129,8 +129,6 @@ public class UnitFactory {
         return null;
     }
 
-
-
     public void interrupted() {
         interrupted = true;
     }
@@ -154,7 +152,7 @@ public class UnitFactory {
 
     public void send_units(Player player,String unitName){
         traveling=true;
-        Call.sendMessage("[green]"+unitName+" were launched from hangar to "+player.name+"s position.It will arrive in "+MyPlugin.transport_time/60+"min.");
+        Call.sendMessage("[scarlet][Server][][green]"+unitName+" were launched from hangar to "+player.name+"s position.It will arrive in "+MyPlugin.transport_time/60+"min.");
         ArrayList<BaseUnit> units=new ArrayList<>();
         switch (unitName) {
             case LICH:
@@ -177,7 +175,7 @@ public class UnitFactory {
         Timer.schedule(()->{
             traveling=false;
             if(interrupted){
-                Call.sendMessage("Units arrived but there in nothing to fight for anymore.");
+                Call.sendMessage("[scarlet][Server][]Units arrived but there in nothing to fight for anymore.");
                 interrupted=false;
                 return;
             }
@@ -186,7 +184,7 @@ public class UnitFactory {
                 if (!unit.isFlying()){
                     Tile tile= world.tile((int)unit.x / 8, (int)unit.y / 8);
                     if(tile.solid() && tile.breakable()) {
-                        Call.sendMessage("[red]Ground unit crashed horribly into building you built on landing point.");
+                        Call.sendMessage("[scarlet][Server]Ground unit crashed horribly into building you built on landing point.");
                         tile.entity.damage(unit.health);
                     }
                 }
@@ -236,7 +234,7 @@ public class UnitFactory {
 
     public String price(Player player,String unitName){
         if (!unitName.equals(REAP) && !unitName.equals(LICH)  && !unitName.equals(ERAD)) {
-            player.sendMessage("there is no [red]" + unitName + "[white] only reaper,lich and eradicator.");
+            player.sendMessage("[scarlet][Server][]There is no [scarlet]" + unitName + "[white] only reaper,lich and eradicator.");
             return null;
         }
         StringBuilder message= new StringBuilder();
@@ -248,7 +246,8 @@ public class UnitFactory {
             message.append(price>inLoadout ? "[red]":"[white]");
             message.append(inLoadout).append(" [white]/ ").append(price).append(MyPlugin.itemIcons[i]).append("\n");
         }
-        message.append("\n[red]!!![white]Factory will take resources form loadout not from a core[red]!!![white]");
+        message.append("\n[red]!!![white]Factory will take resources form loadout not from a core[red]!!![white]\n");
+        message.append("Build time: [orange]").append(unitStats.get(unitName)[buildTimeIdx]).append(".");
         return message.toString();
 
     }
@@ -260,6 +259,7 @@ public class UnitFactory {
         }
         return data.toString();
     }
+
     public void load_data(String facData){
         int idx=0;
         String[] vals=facData.split("/");

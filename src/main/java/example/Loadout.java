@@ -36,12 +36,12 @@ public class Loadout{
     public boolean set_transport_inf(String sItem,String sAmount,Player player,boolean can_all,boolean to_core){
         launch_to_core=to_core;
         if(transporting){
-            player.sendMessage("[orange]"+launch_amount+" "+launch_item.name+"[white] is currently being transported." +
+            player.sendMessage("[scarlet][Server][][orange]"+launch_amount+" "+launch_item.name+"[white] is currently being transported." +
                     "you have to wait " + time / 60 + "min" + time % 60 + "sec for it to arrive.");
             return false;
         }
         if(MyPlugin.isNotInteger(sAmount)){
-            player.sendMessage("[scarlet]You entered wrong amount!");
+            player.sendMessage("[scarlet][Server][]You entered wrong amount!");
             return false;
         }
         launch_amount=Integer.parseInt(sAmount);
@@ -58,7 +58,7 @@ public class Loadout{
                 }
                 message.append(item.name).append("  ");
             }
-            player.sendMessage("[scarlet]You taped the name of item wrong!");
+            player.sendMessage("[scarlet][Server][]You taped the name of item wrong!");
             player.sendMessage("List of items:"+message.toString());
             return false;
         }
@@ -134,13 +134,13 @@ public class Loadout{
             Timer.schedule(()->{
                 transporting=false;
                 if(interrupted){
-                    Call.sendMessage("Base is gone ,[orange]"+message+"[white] going back to loadout.");
+                    Call.sendMessage("[scarlet][Server][]Base is gone ,[orange]"+message+"[white] going back to loadout.");
                     storage[idx]+=amount;
                     interrupted=false;
                     return;
                 }
                 core.items.add(finalItem,amount);
-                Call.sendMessage("[green]"+message+" arrived to core");
+                Call.sendMessage("[scarlet][Server][green]"+message+" arrived to core");
             },time);
         }else{
             if(launch_item==null){
@@ -158,7 +158,7 @@ public class Loadout{
                 core.items.remove(launch_item, amount);
                 storage[idx] += amount;
             }
-            Call.sendMessage("[green]"+message+" arrived to loadout");
+            Call.sendMessage("[scarlet][Server][green]"+message+" arrived to loadout");
         }
     }
 
@@ -183,6 +183,7 @@ public class Loadout{
         message.append(shipReport);
         return message.toString();
     }
+    
     public void interrupted() {
         interrupted=true;
     }
