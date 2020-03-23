@@ -63,6 +63,7 @@ public class MyPlugin extends Plugin{
 
     private void load_data() {
         try {
+            File file=new File(filename);
             FileReader fileReader = new FileReader(filename);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String lodData=bufferedReader.readLine();
@@ -70,7 +71,7 @@ public class MyPlugin extends Plugin{
             String facData=bufferedReader.readLine();
             factory.load_data(facData);
             bufferedReader.close();
-            Log.info("Data loaded."+lodData+"---"+facData);
+            Log.info("Data loaded from "+file.getAbsolutePath()+"."+lodData+"---"+facData);
         }catch (FileNotFoundException ex){
             Log.info("No saves found.");
         }catch (IOException ex){
@@ -80,6 +81,7 @@ public class MyPlugin extends Plugin{
     }
     private void save_data(){
         try {
+            File file=new File(filename);
             String lodData = loadout.get_data();
             String facData = factory.get_data();
             FileWriter fileWriter = new FileWriter(filename);
@@ -89,7 +91,7 @@ public class MyPlugin extends Plugin{
             bufferedWriter.write(facData);
             bufferedWriter.newLine();
             bufferedWriter.close();
-            Log.info("Data saved."+lodData+"---"+facData);
+            Log.info("Data saved to "+file.getAbsolutePath()+"."+lodData+"---"+facData);
         }catch (IOException ex){
             Log.info("Error when saving data.");
         }
@@ -269,24 +271,36 @@ public class MyPlugin extends Plugin{
                 "hangar or sending then to your position. It can build lich,reaper and eradicator for a reasonable " +
                 "amount of resources. Be aware of that factory can use only resources in loadout."));
 
-        handler.<Player>register("f-build","<unitName>","Sends build request to factory that will then build " +
+        handler.<Player>register("f-build","<unitName> [amount]","Sends build request to factory that will then build " +
                 "unit from loadout resources and send it to us.",(arg, player) -> {
-            if(!factory.verify_request(player,arg[0])) {
+            int amount;
+            if(arg.length==1){
+                amount=1;
+            }else {
+                if(isNotInteger(arg[1])){
+                    player.sendMessage("[scarlet][Server][]Amount has to be integer.");
+                    return;
+                }else {
+                    amount=Integer.parseInt(arg[1]);
+                }
+            }
+            if(!factory.verify_request(player,arg[0],amount)) {
                 return;
             }
-            vote.factory_Vote(player,"build",arg[0]);
+            vote.factory_Vote(player,"build",arg[0],amount);
         });
 
         handler.<Player>register("f-info","Displays traveling and building progress of units."
                 , (arg, player) ->{
-            player.sendMessage("[orange]FACTORY INFO");
-            factory.info(player);
+                    String message="[orange]FACTORY INFO[]\n";
+                    message+=factory.info();
+                    Call.onInfoMessage(player.con,message);
                 });
 
         handler.<Player>register("f-release","<unit/all>","Sends all units or only specified type " +
                 "to your position.",(arg, player) -> {
             if (factory.verify_deployment(player,arg[0])){
-                vote.factory_Vote(player,"release",arg[0]);
+                vote.factory_Vote(player,"release",arg[0],0);
             }
         });
         handler.<Player>register("f-price-of" ,"<unit-name>","Displays pricing of units."
