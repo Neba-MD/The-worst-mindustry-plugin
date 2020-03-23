@@ -28,7 +28,7 @@ public class MyPlugin extends Plugin{
     static int max_transport=5000;
     static int transport_time=5*60;
     static boolean pending_gameover=false;
-    int autoSaveFrequency=1;
+    int autoSaveFrequency=5;
 
     public MyPlugin(){
         load_data();

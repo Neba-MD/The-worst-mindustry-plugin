@@ -1,7 +1,6 @@
 
 package example;
 
-import arc.struct.Array;
 import mindustry.content.UnitTypes;
 import mindustry.entities.type.BaseUnit;
 import mindustry.entities.type.Player;
@@ -12,6 +11,8 @@ import static mindustry.Vars.*;
 import java.util.*;
 
 import arc.util.Timer;
+import mindustry.world.Tile;
+
 
 
 public class UnitFactory {
@@ -180,7 +181,15 @@ public class UnitFactory {
                 interrupted=false;
                 return;
             }
+            Call.sendMessage("[green]"+unitName+" arrived");
             for(BaseUnit unit:units){
+                if (!unit.isFlying()){
+                    Tile tile= world.tile((int)unit.x / 8, (int)unit.y / 8);
+                    if(tile.solid() && tile.breakable()) {
+                        Call.sendMessage("[red]Ground unit crashed horribly into building you built on landing point.");
+                        tile.entity.damage(unit.health);
+                    }
+                }
                unit.add();
             }
         },time);
