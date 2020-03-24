@@ -31,6 +31,8 @@ public class UnitFactory {
 
     int time=0;
     int buildAmount=0;
+    int dropPosX =0;
+    int dropPosY =0;
 
     private final String ERAD="eradicator";
     private final String LICH="lich";
@@ -131,6 +133,8 @@ public class UnitFactory {
                 return false;
             }
         }
+        dropPosX=x;
+        dropPosY=y;
         return true;
     }
 
@@ -173,7 +177,7 @@ public class UnitFactory {
     public void add_units(UnitType unitType,ArrayList<BaseUnit> units,Player player){
         for(int i=0;i<unitStats.get(unitType.name)[unitCount];i++){
             BaseUnit unit=unitType.create(player.getTeam());
-            unit.set(player.x,player.y);
+            unit.set(dropPosX,dropPosY);
             units.add(unit);
         }
         unitStats.get(unitType.name)[unitCount]=0;
@@ -205,9 +209,13 @@ public class UnitFactory {
                     Tile tile= world.tile((int)unit.x / 8, (int)unit.y / 8);
                     if(tile.solid() && tile.breakable()) {
                         Call.sendMessage("[scarlet][Server]Ground units crashed horribly into building you built on landing point.");
-                        tile.entity.damage(unit.health);
+                        tile.entity.damage(100000000);
+                        break;
                     }
                 }
+
+            }
+            for(BaseUnit unit:units){
                 unit.add();
             }
         },time);

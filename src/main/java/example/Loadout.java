@@ -131,6 +131,20 @@ public class Loadout{
                 }
             },0,1,time-1);
             Item finalItem=launch_item;
+            Timer.Task transport=new Timer.Task() {
+                @Override
+                public void run() {
+                    transporting=false;
+                    if(interrupted){
+                        Call.sendMessage("[scarlet][Server][]Base is gone ,[orange]"+message+"[white] going back to loadout.");
+                        storage[idx]+=amount;
+                        interrupted=false;
+                        return;
+                    }
+                    core.items.add(finalItem,amount);
+                    Call.sendMessage("[scarlet][Server][green]"+message+" arrived to core");
+                }
+            };
             Timer.schedule(()->{
                 transporting=false;
                 if(interrupted){
