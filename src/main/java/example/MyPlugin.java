@@ -71,7 +71,7 @@ public class MyPlugin extends Plugin{
             String facData=bufferedReader.readLine();
             factory.load_data(facData);
             bufferedReader.close();
-            Log.info("Data loaded from "+file.getAbsolutePath()+"."+lodData+"---"+facData);
+            Log.info("Data loaded.");
         }catch (FileNotFoundException ex){
             Log.info("No saves found.");
         }catch (IOException ex){
@@ -91,7 +91,7 @@ public class MyPlugin extends Plugin{
             bufferedWriter.write(facData);
             bufferedWriter.newLine();
             bufferedWriter.close();
-            Log.info("Data saved to "+file.getAbsolutePath()+"."+lodData+"---"+facData);
+            Log.info("Data saved.");
         }catch (IOException ex){
             Log.info("Error when saving data.");
         }
@@ -253,14 +253,14 @@ public class MyPlugin extends Plugin{
 
         handler.<Player>register("l-use","<item> <amount>","Uses loadout resources up to [orange]"+
                max_transport+"[white].",(arg, player) -> {
-            if (loadout.set_transport_inf(arg[0], arg[1],player,false,true)){
+            if (!vote.check(player) && loadout.set_transport_inf(arg[0], arg[1],player,false,true)){
                 vote.loadout_Vote(player,"use");
             }
         });
 
         handler.<Player>register("l-fill","<item/all> <amount>","Fills loadout with resources " +
                 "from core up to [orange]"+loadout.capacity+" [white]for each resource",(arg, player) -> {
-            if (loadout.set_transport_inf(arg[0],arg[1],player,true,false)){
+            if (!vote.check(player) && loadout.set_transport_inf(arg[0],arg[1],player,true,false)){
                 vote.loadout_Vote(player,"fill");
             }
         });
@@ -284,10 +284,10 @@ public class MyPlugin extends Plugin{
                     amount=Integer.parseInt(arg[1]);
                 }
             }
-            if(!factory.verify_request(player,arg[0],amount)) {
-                return;
+            if(!vote.check(player) && factory.verify_request(player,arg[0],amount)) {
+                vote.factory_Vote(player,"build",arg[0],amount);
             }
-            vote.factory_Vote(player,"build",arg[0],amount);
+
         });
 
         handler.<Player>register("f-info","Displays traveling and building progress of units."
@@ -299,7 +299,7 @@ public class MyPlugin extends Plugin{
 
         handler.<Player>register("f-release","<unit/all>","Sends all units or only specified type " +
                 "to your position.",(arg, player) -> {
-            if (factory.verify_deployment(player,arg[0])){
+            if (!vote.check(player) && factory.verify_deployment(player,arg[0])){
                 vote.factory_Vote(player,"release",arg[0],0);
             }
         });

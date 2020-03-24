@@ -27,7 +27,7 @@ public class Build_request{
 
     public String info(){
         if (building){
-            return "[scarlet][Server][]Factory is currently building [orange]" +amount+" "+ unitName +
+            return "Factory is currently building [orange]" +amount+" "+ unitName +
                     "[white].It will be finished in " +
                     time / 60 + "min" + time % 60 + "sec.\n";
         }

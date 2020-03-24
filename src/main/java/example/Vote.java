@@ -35,14 +35,12 @@ public class Vote {
     }
 
     void loadout_Vote(Player player, String type) {
-        if(check()){return;}
         this.player = player;
         this.type = type;
         command();
     }
 
     void factory_Vote(Player player,String type,String unitType,int unitAmount) {
-        if(check()){return;}
         this.player = player;
         this.type = type;
         this.unitType=unitType;
@@ -50,7 +48,7 @@ public class Vote {
         command();
     }
 
-    public boolean check(){
+    public boolean check(Player player){
         if(isvoting){
             player.sendMessage("[scarlet][Server][]vote-in-processing");
             return true;
