@@ -209,7 +209,9 @@ public class UnitFactory {
                     Tile tile= world.tile((int)unit.x / 8, (int)unit.y / 8);
                     if(tile.solid() && tile.breakable()) {
                         Call.sendMessage("[scarlet][Server]Ground units crashed horribly into building you built on landing point.");
-                        tile.entity.damage(100000000);
+                        if(tile.entity!=null){
+                            tile.removeNet();
+                        }
                         break;
                     }
                 }

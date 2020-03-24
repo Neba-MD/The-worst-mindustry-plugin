@@ -1,11 +1,15 @@
 package example;
 
 import arc.Events;
+import arc.maps.TileSet;
+import arc.maps.TileSets;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Timer;
 import mindustry.content.Blocks;
+import mindustry.entities.traits.BuilderTrait;
 import mindustry.entities.type.Player;
+import mindustry.entities.type.TileEntity;
 import mindustry.game.EventType;
 import mindustry.game.Teams;
 import mindustry.gen.Call;
@@ -13,10 +17,15 @@ import mindustry.plugin.Plugin;
 import mindustry.type.Item;
 import mindustry.type.ItemType;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 
+
+import java.awt.*;
 import java.io.*;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 import static mindustry.Vars.*;
 
 public class MyPlugin extends Plugin{
@@ -42,9 +51,17 @@ public class MyPlugin extends Plugin{
                 }
             }
         });
+        Events.on(EventType.BuildSelectEvent.class, e->{
+            double dist=sqrt((pow(e.tile.x-(int)(factory.dropPosX/8),2)+pow(e.tile.y-(int)(factory.dropPosY/8),2)));
+            if(factory.traveling &&  dist<4) {
+                e.tile.removeNet();
+                ((Player)e.builder).sendMessage("[scarlet][Server]You cannot build on unit drop point.");
+            }
+
+        });
         Events.on(EventType.GameOverEvent.class,e-> interrupted());
         Events.on(EventType.WorldLoadEvent.class,e-> pending_gameover=false);
-        /*Events.on(BuildSelectEvent.class, event -> {
+        /*Events.on(EventType.BuildSelectEvent.class, event -> {
             if(!event.breaking && event.builder != null && event.builder.buildRequest() != null && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player){
                 //send a message to everyone saying that this player has begun building a reactor
                 Call.sendMessage("[scarlet]ALERT![] " + ((Player)event.builder).name + " has begun building a reactor at " + event.tile.x + ", " + event.tile.y);
@@ -220,6 +237,13 @@ public class MyPlugin extends Plugin{
                 core.items.add(item, 40000);
             }
         });
+        handler.<Player>register("break","breaks something",(args,player)->{
+            Tile tile=world.tile((int)player.x/8,(int)player.y/8);
+            if(tile.entity!=null ){
+                tile.entity.remove();
+            }
+
+        });
 
         handler.<Player>register("build-core","<small/normal/big>", "Makes new core", (arg, player) -> {
             // Core type
@@ -229,6 +253,7 @@ public class MyPlugin extends Plugin{
             switch(arg[0]){
                 case "normal":
                     to_build = Blocks.coreFoundation;
+
                     cost=(int)(storage*.5f);
                     break;
                 case "big":
