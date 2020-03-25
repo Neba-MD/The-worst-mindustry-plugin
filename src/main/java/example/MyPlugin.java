@@ -1,15 +1,14 @@
 package example;
 
 import arc.Events;
-import arc.maps.TileSet;
-import arc.maps.TileSets;
+
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Timer;
 import mindustry.content.Blocks;
-import mindustry.entities.traits.BuilderTrait;
+
 import mindustry.entities.type.Player;
-import mindustry.entities.type.TileEntity;
+
 import mindustry.game.EventType;
 import mindustry.game.Teams;
 import mindustry.gen.Call;
@@ -17,11 +16,11 @@ import mindustry.plugin.Plugin;
 import mindustry.type.Item;
 import mindustry.type.ItemType;
 import mindustry.world.Block;
-import mindustry.world.Tile;
+
 import mindustry.world.blocks.storage.CoreBlock;
 
 
-import java.awt.*;
+
 import java.io.*;
 
 import static java.lang.Math.pow;
@@ -36,7 +35,6 @@ public class MyPlugin extends Plugin{
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
     static int max_transport=5000;
     static int transport_time=5*60;
-    static boolean pending_gameover=false;
     int autoSaveFrequency=5;
 
     public MyPlugin(){
@@ -53,14 +51,16 @@ public class MyPlugin extends Plugin{
         });
         Events.on(EventType.BuildSelectEvent.class, e->{
             double dist=sqrt((pow(e.tile.x-(int)(factory.dropPosX/8),2)+pow(e.tile.y-(int)(factory.dropPosY/8),2)));
-            if(factory.traveling &&  dist<4) {
+            if(factory.traveling &&  dist<UnitFactory.dropPointRange) {
                 e.tile.removeNet();
                 ((Player)e.builder).sendMessage("[scarlet][Server]You cannot build on unit drop point.");
             }
 
         });
-        Events.on(EventType.GameOverEvent.class,e-> interrupted());
-        Events.on(EventType.WorldLoadEvent.class,e-> pending_gameover=false);
+        Events.on(EventType.WorldLoadEvent.class,e->{
+            interrupted();
+
+        });
         /*Events.on(EventType.BuildSelectEvent.class, event -> {
             if(!event.breaking && event.builder != null && event.builder.buildRequest() != null && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player){
                 //send a message to everyone saying that this player has begun building a reactor
@@ -70,7 +70,6 @@ public class MyPlugin extends Plugin{
         }
 
     private void interrupted() {
-        pending_gameover=true;
         factory.interrupted();
         if(vote.isIsvoting()) {
             vote.cancel();
@@ -80,13 +79,10 @@ public class MyPlugin extends Plugin{
 
     private void load_data() {
         try {
-            File file=new File(filename);
             FileReader fileReader = new FileReader(filename);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String lodData=bufferedReader.readLine();
-            loadout.load_data(lodData);
-            String facData=bufferedReader.readLine();
-            factory.load_data(facData);
+            loadout.load_data(bufferedReader.readLine());
+            factory.load_data(bufferedReader.readLine());
             bufferedReader.close();
             Log.info("Data loaded.");
         }catch (FileNotFoundException ex){
@@ -98,14 +94,11 @@ public class MyPlugin extends Plugin{
     }
     private void save_data(){
         try {
-            File file=new File(filename);
-            String lodData = loadout.get_data();
-            String facData = factory.get_data();
             FileWriter fileWriter = new FileWriter(filename);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(lodData);
+            bufferedWriter.write(loadout.get_data());
             bufferedWriter.newLine();
-            bufferedWriter.write(facData);
+            bufferedWriter.write(factory.get_data());
             bufferedWriter.newLine();
             bufferedWriter.close();
             Log.info("Data saved.");

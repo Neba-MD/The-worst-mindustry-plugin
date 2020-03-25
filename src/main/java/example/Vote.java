@@ -49,11 +49,8 @@ public class Vote {
     }
 
     public boolean check(Player player){
-        if(isvoting){
+        if(isvoting) {
             player.sendMessage("[scarlet][Server][]vote-in-processing");
-            return true;
-        }if(MyPlugin.pending_gameover){
-            player.sendMessage("[scarlet][Server][]Game is over. Please wait!");
             return true;
         }
         return false;

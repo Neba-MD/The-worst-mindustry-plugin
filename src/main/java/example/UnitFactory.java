@@ -34,6 +34,7 @@ public class UnitFactory {
     int dropPosX =0;
     int dropPosY =0;
 
+
     private final String ERAD="eradicator";
     private final String LICH="lich";
     private final String REAP="reaper";
@@ -42,6 +43,7 @@ public class UnitFactory {
     static final int buildTimeIdx = 10;
     static final int unitCount = 11;
     static final int buildLimit=12;
+    public static final int dropPointRange=4;
 
     public UnitFactory(Loadout loadout) {
         unitStats.put(REAP, reaperCost);

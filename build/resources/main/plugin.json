@@ -1,0 +1,7 @@
+{
+  "name": "TheWorstPlugin",
+  "author": "Mlokis",
+  "main": "example.MyPlugin",
+  "description": "A plugin for the worst server ewer.",
+  "version": 1.1
+}
