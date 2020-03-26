@@ -1,13 +1,14 @@
 
 package example;
 
-import mindustry.content.UnitTypes;
+import arc.util.Log;
 import mindustry.entities.type.BaseUnit;
 import mindustry.entities.type.Player;
 import mindustry.gen.Call;
 import mindustry.type.Item;
 import static mindustry.Vars.*;
 
+import java.io.*;
 import java.util.*;
 
 import arc.util.Timer;
@@ -24,33 +25,119 @@ public class UnitFactory {
     HashMap<String, int[]> unitStats = new HashMap<>();
     ArrayList<Build_request> requests = new ArrayList<>();
 
-    int[] reaperCost = {10000, 10000, 4000, 3000, 5000, 1000, 5000, 500, 500, 500, 2, 0,1};
-    int[] lichCost = {5000, 5000, 2000, 1500, 2500, 500, 2500, 250, 250, 250, 1, 0,2};
-    int[] eradCost = {20000, 20000, 8000, 6000, 10000, 5000, 10000, 2000, 2000, 2000, 3, 0,1};
-    int[] chaosCost={5000, 5000, 2000, 1500, 2500, 500, 2500, 250, 250, 250, 1, 0,3};
-
     int time=0;
     int buildAmount=0;
     int dropPosX =0;
     int dropPosY =0;
 
+    private final String configFile=MyPlugin.dir+"config.txt";
 
-    private final String ERAD="eradicator";
-    private final String LICH="lich";
-    private final String REAP="reaper";
-    private final String CHAOS="chaos-array";
-
-    static final int buildTimeIdx = 10;
-    static final int unitCount = 11;
-    static final int buildLimit=12;
+    static final int buildTime = 10;
+    static final int buildLimit=11;
+    static final int unitCount = 12;
+    public static final int maxDeployment=300;
     public static final int dropPointRange=4;
 
     public UnitFactory(Loadout loadout) {
-        unitStats.put(REAP, reaperCost);
-        unitStats.put(LICH, lichCost);
-        unitStats.put(ERAD, eradCost);
-        unitStats.put(CHAOS,chaosCost);
         this.loadout=loadout;
+    }
+
+    public UnitType getUnitType(String unitName){
+        for(UnitType unit:content.units()){
+            if(unitName.equals(unit.name)){
+                return unit;
+            }
+        }
+        return null;
+    }
+
+    public void config(){
+        try {
+            FileReader fileReader = new FileReader(configFile);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String data;
+            unitStats.clear();
+            boolean loaded=false;
+            while ((data=bufferedReader.readLine())!=null){
+                String[] splitdata=data.split("/");
+                String unitName=splitdata[0];
+                if(getUnitType(unitName)==null){
+                    Log.info("Non existent unit name "+unitName+".It will be ignored.");
+                    continue;
+                }
+                int[] unitInfo=new int[13];
+                int idx=0;
+                for(String num:splitdata){
+                    if(idx>unitInfo.length-2){
+                        Log.info("WARMING:You entered too mani information for "+unitName+".Surplus numbers will be ignored.");
+                        break;
+                    }
+                    if(MyPlugin.isNotInteger(num)) {
+                        if (num.equals(unitName)) {
+                            continue;
+                        }
+                        Log.info("You entered "+unitName+" information wrong.It all has to be integers.");
+                        break;
+                    }
+                    unitInfo[idx]=Integer.parseInt(num);
+                    idx++;
+                }
+                if(idx<unitInfo.length-1){
+                    Log.info("You entered too few information for "+unitName+"."+unitName+ " will be ignored.");
+                    continue;
+                }
+                unitStats.put(unitName,unitInfo);
+                loaded=true;
+            }
+            bufferedReader.close();
+            if(!loaded){
+                Log.info("There wos nothing to load. "+configFile+"wos not edited of have a typo in it.");
+                return;
+            }
+            Log.info("Config loaded.");
+        }catch (FileNotFoundException ex){
+            Log.info("No config file found.");
+            createDefaultConfig();
+
+        }catch (IOException ex){
+            Log.info("Error when loading data from "+configFile+".");
+        }
+    }
+
+    public void createDefaultConfig(){
+        StringBuilder list=new StringBuilder();
+        for(UnitType unit:content.units()){
+            list.append(unit.name).append(" ");
+        }
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(configFile));
+            bw.write("This is config file.Formatting of your config is as follows:");
+            bw.newLine();
+            bw.write("unitName/copper/lead/metaglass/graphite/titanium/thorium/silicon/plastanium/phaseFabric/surgeAlloy/"+
+                    "buildTime/buildLimit");
+            bw.newLine();
+            bw.write("For example:");
+            bw.newLine();
+            bw.write("eradicator/20000/20000/8000/6000/10000/5000/10000/2000/2000/2000/3/1");
+            bw.newLine();
+            bw.write("unitName specifies what type of unit can factory build.");
+            bw.newLine();
+            bw.write("The list of valid units:");
+            bw.newLine();
+            bw.write(list.toString());
+            bw.newLine();
+            bw.write("first ten numbers specif how match will unit cost in resources");
+            bw.newLine();
+            bw.write("buildTime sets how log it takes to build unit");
+            bw.newLine();
+            bw.write("buildLimit sets how many units can factory build at the same time");
+            bw.newLine();
+            bw.write("Don t forget to delete all unnecessary text");
+            bw.close();
+            Log.info("Default "+configFile+" successfully created.Edit it and use apply-config command.");
+        }catch (IOException ex){
+            Log.info("Error when loading default config.");
+        }
     }
 
     public boolean verify_request(Player player, String unitName,int amount) {
@@ -108,7 +195,7 @@ public class UnitFactory {
         return unitStats.get(unitName)[unitCount];
     }
 
-    public boolean verify_deployment(Player player, String unitName){
+    public boolean verify_deployment(Player player, String unitName,int amount){
         if(traveling){
             player.sendMessage("[scarlet][Server][]Units are being transported currently.They will arrive in " +
                     time / 60 + "min" + time % 60 + "sec.");
@@ -123,8 +210,13 @@ public class UnitFactory {
                     names);
             return false;
         }
-        if (get_unit_count(unitName)==0){
+        int unitCount=get_unit_count(unitName);
+        if (unitCount==0 || (unitCount<amount && !unitName.equals("all"))){
             player.sendMessage("[scarlet][Server][]There are "+get_unit_count(unitName)+" of "+unitName+" in hangar.");
+            return false;
+        }
+        if (amount>maxDeployment){
+            player.sendMessage("[scarlet][Server][]you cannot deploy mort then "+maxDeployment+" at the time.");
             return false;
         }
         int x = (int) player.x;
@@ -162,39 +254,29 @@ public class UnitFactory {
         interrupted = true;
     }
 
-    public UnitType getUnitType(String unitName){
-        switch (unitName){
-            case REAP:
-                return UnitTypes.reaper;
-            case ERAD:
-                return UnitTypes.eradicator;
-            case LICH:
-                return UnitTypes.lich;
-            case CHAOS:
-                return UnitTypes.chaosArray;
-        }
-        return null;
-    }
 
-    public void add_units(UnitType unitType,ArrayList<BaseUnit> units,Player player){
-        for(int i=0;i<unitStats.get(unitType.name)[unitCount];i++){
+
+    public void add_units(UnitType unitType,ArrayList<BaseUnit> units,Player player,int amount){
+        amount=amount==-1 ? unitStats.get(unitType.name)[unitCount]:amount;
+        for(int i=0;i<amount;i++){
             BaseUnit unit=unitType.create(player.getTeam());
             unit.set(dropPosX,dropPosY);
             units.add(unit);
         }
-        unitStats.get(unitType.name)[unitCount]=0;
+
+        unitStats.get(unitType.name)[unitCount]-=amount;
     }
 
-    public void send_units(Player player,String unitName){
+    public void send_units(Player player,String unitName,int amount){
         traveling=true;
         Call.sendMessage("[scarlet][Server][][green]"+unitName+" were launched from hangar to "+player.name+"s position.It will arrive in "+MyPlugin.transport_time/60+"min.");
         ArrayList<BaseUnit> units=new ArrayList<>();
         if (unitName.equals("all")){
             for (String name:unitStats.keySet()){
-                add_units(getUnitType(name),units,player);
+                add_units(getUnitType(name),units,player,-1);
             }
         }else {
-            add_units(getUnitType(unitName),units,player);
+            add_units(getUnitType(unitName),units,player,amount);
         }
         interrupted=false;
         time= MyPlugin.transport_time;
@@ -211,9 +293,7 @@ public class UnitFactory {
                     Tile tile= world.tile((int)unit.x / 8, (int)unit.y / 8);
                     if(tile.solid() && tile.breakable()) {
                         Call.sendMessage("[scarlet][Server]Ground units crashed horribly into building you built on landing point.");
-                        if(tile.entity!=null){
-                            tile.removeNet();
-                        }
+                        tile.removeNet();
                         break;
                     }
                 }
@@ -241,7 +321,7 @@ public class UnitFactory {
             loadout.storage[idx] -= requires*amount;
             idx++;
         }
-        Build_request b = new Build_request(unitName,unitStats.get(unitName)[buildTimeIdx] * 60,buildAmount, this);
+        Build_request b = new Build_request(unitName,unitStats.get(unitName)[buildTime] * 60,buildAmount, this);
         requests.add(b);
     }
 
@@ -282,11 +362,15 @@ public class UnitFactory {
         for(int i=0;i<10;i++){
             int inLoadout=loadout.storage[i];
             int price=unitStats.get(unitName)[i];
+            if(price==0){
+                continue;
+            }
             message.append(price>inLoadout ? "[red]":"[white]");
             message.append(inLoadout).append(" [white]/ ").append(price).append(MyPlugin.itemIcons[i]).append("\n");
         }
         message.append("\n[red]!!![white]Factory will take resources from loadout not from the core[red]!!![white]\n");
-        message.append("Build time: [orange]").append(unitStats.get(unitName)[buildTimeIdx]).append(".");
+        message.append("Build time: [orange]").append(unitStats.get(unitName)[buildTime]).append("[].\n");
+        message.append("Factory can build [orange]").append(unitStats.get(unitName)[buildLimit]).append("units at the same time.");
         return message.toString();
 
     }

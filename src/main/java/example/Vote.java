@@ -51,9 +51,9 @@ public class Vote {
     public boolean check(Player player){
         if(isvoting) {
             player.sendMessage("[scarlet][Server][]vote-in-processing");
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     public void cancel() {
@@ -81,7 +81,7 @@ public class Vote {
             case "release":
                 if (require <= 0) {
                     Call.sendMessage("[scarlet][Server][]vote-launch of units-done");
-                    factory.send_units(player,unitType);
+                    factory.send_units(player,unitType,unitAmount);
                 } else {
                     Call.sendMessage("[scarlet][Server][]vote-launch of units-fail");
                 }
@@ -122,10 +122,9 @@ public class Vote {
                 Call.sendMessage("[scarlet][Server][][orange] " +player.name+ "[] has casted vote to build [orange]" +unitAmount+" "+unitType+ "[]. Open chat window and say [orange]'y' [white]to agree.");
                 break;
             case "release":
-                Call.sendMessage("[scarlet][Server][][orange] " +player.name+ "[] has casted vote to launch [orange]" +unitType+ "[] units. Open chat window and say [orange]'y' [white]to agree.");
+                Call.sendMessage("[scarlet][Server][][orange] " +player.name+ "[] has casted vote to launch [orange]"+ (unitType.equals("all") ? "":unitAmount+" "+unitType)+ "[] units. Open chat window and say [orange]'y' [white]to agree.");
                 break;
         }
-
             countdown(voteIdx);
             alert(voteIdx);
     }

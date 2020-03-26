@@ -28,19 +28,23 @@ import static java.lang.Math.sqrt;
 import static mindustry.Vars.*;
 
 public class MyPlugin extends Plugin{
-    private final String filename="myPluginData.txt";
     Loadout loadout=new Loadout();
     UnitFactory factory=new UnitFactory(loadout);
     Vote vote=new Vote(factory,loadout);
+
+    static String dir="config/mods/myPlugin/";
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
     static int max_transport=5000;
     static int transport_time=5*60;
+
     int autoSaveFrequency=5;
 
+    private final String filename=dir+"data.txt";
+
+
+
     public MyPlugin(){
-        load_data();
-        Log.info("Saves once a "+autoSaveFrequency+"min.");
-        autoSave();
+
         Events.on(EventType.PlayerChatEvent.class, e -> {
             String check = String.valueOf(e.message.charAt(0));
             if (!check.equals("/") && vote.isIsvoting()) {
@@ -49,17 +53,27 @@ public class MyPlugin extends Plugin{
                 }
             }
         });
+
         Events.on(EventType.BuildSelectEvent.class, e->{
-            double dist=sqrt((pow(e.tile.x-(int)(factory.dropPosX/8),2)+pow(e.tile.y-(int)(factory.dropPosY/8),2)));
+            double dist=sqrt((pow(e.tile.x-(float)(factory.dropPosX/8),2)+pow(e.tile.y-(float)(factory.dropPosY/8),2)));
             if(factory.traveling &&  dist<UnitFactory.dropPointRange) {
                 e.tile.removeNet();
                 ((Player)e.builder).sendMessage("[scarlet][Server]You cannot build on unit drop point.");
             }
 
         });
-        Events.on(EventType.WorldLoadEvent.class,e->{
-            interrupted();
 
+        Events.on(EventType.WorldLoadEvent.class,e-> interrupted());
+
+        Events.on(EventType.ServerLoadEvent.class,e->{
+            if(!makeDir()){
+                Log.info("There wos a problem with creating "+dir+" please add it manually.");
+                return;
+            }
+            load_data();
+            Log.info("Saves once a "+autoSaveFrequency+"min.");
+            autoSave();
+            factory.config();
         });
         /*Events.on(EventType.BuildSelectEvent.class, event -> {
             if(!event.breaking && event.builder != null && event.builder.buildRequest() != null && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player){
@@ -68,6 +82,14 @@ public class MyPlugin extends Plugin{
             }
         });*/
         }
+
+    private boolean makeDir(){
+        File dir=new File(MyPlugin.dir);
+        if(!dir.exists()){
+            return dir.mkdir();
+        }
+        return true;
+    }
 
     private void interrupted() {
         factory.interrupted();
@@ -86,12 +108,14 @@ public class MyPlugin extends Plugin{
             bufferedReader.close();
             Log.info("Data loaded.");
         }catch (FileNotFoundException ex){
-            Log.info("No saves found.");
+            Log.info("No saves found.New save file "+filename+" will be created.");
+            save_data();
         }catch (IOException ex){
             Log.info("Error when loading data from "+filename+".");
         }
 
     }
+
     private void save_data(){
         try {
             FileWriter fileWriter = new FileWriter(filename);
@@ -107,13 +131,13 @@ public class MyPlugin extends Plugin{
         }
 
     }
+
     private void autoSave(){
         Timer.schedule(()->{
             save_data();
             autoSave();
         },autoSaveFrequency*60);
     }
-
 
     public static boolean isNotInteger(String str) {
         if(str == null || str.trim().isEmpty()) {
@@ -137,6 +161,7 @@ public class MyPlugin extends Plugin{
             for(int y = 0; y < world.height(); y++){
                 Block block = world.tile(x, y).block();
                 if (Blocks.coreShard.equals(block)) {
+
                     res += 4000;
                 } else if (Blocks.coreFoundation.equals(block)) {
                     res += 9000;
@@ -178,16 +203,12 @@ public class MyPlugin extends Plugin{
 
         player.sendMessage("[scarlet]Core spawn failed!Not enough resorces.");
     }
-    //register commands that run on the server
+
     @Override
     public void registerServerCommands(CommandHandler handler){
-        handler.register("test","test",args->{
-            Log.info("start");
-            Log.info("finish");
-                });
-        handler.register("save-myplugin-data","saves loadout and factory progress immediately.",args->
+        handler.register("myplugin-save","saves loadout and factory progress immediately.",args->
                 save_data());
-        handler.register("load-myplugin-data","loads save data if there is any.",args->
+        handler.register("myplugin-load","loads save data if there is any.",args->
                 load_data());
         handler.register("set-save-freq","<minutes>","sets autosave s frequency.",args->{
             if(isNotInteger(args[0])){
@@ -197,6 +218,8 @@ public class MyPlugin extends Plugin{
             autoSaveFrequency=Integer.parseInt(args[0]);
             Log.info("Autosave frequency wos set.");
         });
+        handler.register("apply-config","Loads data from config file.",args-> factory.config());
+
         handler.register("set-trans-time","<seconds>","Sets the loadout-use cool down.",args->
         {
             if(isNotInteger(args[0])){
@@ -218,7 +241,7 @@ public class MyPlugin extends Plugin{
 
         });
     }
-    //register commands that player can invoke in-game
+
     @Override
     public void registerClientCommands(CommandHandler handler){
 
@@ -264,14 +287,14 @@ public class MyPlugin extends Plugin{
 
         handler.<Player>register("l-use","<item> <amount>","Uses loadout resources up to [orange]"+
                max_transport+"[white].",(arg, player) -> {
-            if (!vote.check(player) && loadout.set_transport_inf(arg[0], arg[1],player,false,true)){
+            if (vote.check(player) && loadout.set_transport_inf(arg[0], arg[1],player,false,true)){
                 vote.loadout_Vote(player,"use");
             }
         });
 
         handler.<Player>register("l-fill","<item/all> <amount>","Fills loadout with resources " +
                 "from core up to [orange]"+loadout.capacity+" [white]for each resource",(arg, player) -> {
-            if (!vote.check(player) && loadout.set_transport_inf(arg[0],arg[1],player,true,false)){
+            if (vote.check(player) && loadout.set_transport_inf(arg[0],arg[1],player,true,false)){
                 vote.loadout_Vote(player,"fill");
             }
         });
@@ -282,36 +305,34 @@ public class MyPlugin extends Plugin{
                 "hangar or sending then to your position. It can build lich,reaper and eradicator for a reasonable " +
                 "amount of resources. Be aware of that factory can use only resources in loadout."));
 
-        handler.<Player>register("f-build","<unitName> [amount]","Sends build request to factory that will then build " +
-                "unit from loadout resources and send it to us.",(arg, player) -> {
-            int amount;
-            if(arg.length==1){
-                amount=1;
-            }else {
-                if(isNotInteger(arg[1])){
-                    player.sendMessage("[scarlet][Server][]Amount has to be integer.");
-                    return;
-                }else {
-                    amount=Integer.parseInt(arg[1]);
-                }
-            }
-            if(!vote.check(player) && factory.verify_request(player,arg[0],amount)) {
-                vote.factory_Vote(player,"build",arg[0],amount);
-            }
-
-        });
-
         handler.<Player>register("f-info","Displays traveling and building progress of units."
                 , (arg, player) ->{
                     String message="[orange]FACTORY INFO[]\n";
                     message+=factory.info();
                     Call.onInfoMessage(player.con,message);
-                });
+        });
 
-        handler.<Player>register("f-release","<unit/all>","Sends all units or only specified type " +
+        handler.<Player>register("f-build","<unitName> [amount]","Sends build request to factory that will then build " +
+                "unit from loadout resources and send it to us.",(arg, player) -> {
+            int amount=getAmount(arg,player);
+            if(amount==-1){
+                return;
+            }
+            if(vote.check(player) && factory.verify_request(player,arg[0],amount)) {
+                vote.factory_Vote(player,"build",arg[0],amount);
+            }
+        });
+
+
+
+        handler.<Player>register("f-release","<unit/all> [amount]","Sends all units or only an amount of specified type " +
                 "to your position.",(arg, player) -> {
-            if (!vote.check(player) && factory.verify_deployment(player,arg[0])){
-                vote.factory_Vote(player,"release",arg[0],0);
+            int amount=getAmount(arg,player);
+            if(amount==-1){
+                return;
+            }
+            if (vote.check(player) && factory.verify_deployment(player,arg[0],amount)){
+                vote.factory_Vote(player,"release",arg[0],amount);
             }
         });
         handler.<Player>register("f-price-of" ,"<unit-name>","Displays pricing of units."
@@ -320,5 +341,15 @@ public class MyPlugin extends Plugin{
             if (message==null){return;}
             Call.onInfoMessage(player.con,message);
                 });
+    }
+    private int getAmount(String[] arg,Player player){
+        if(arg.length==1){
+            return 1;
+        }
+        if(isNotInteger(arg[1])){
+            player.sendMessage("[scarlet][Server][]Amount has to be integer.");
+            return -1;
+        }
+        return Integer.parseInt(arg[1]);
     }
 }
