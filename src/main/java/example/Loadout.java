@@ -6,6 +6,7 @@ import mindustry.game.Teams;
 import mindustry.gen.Call;
 import mindustry.type.Item;
 import mindustry.world.blocks.storage.CoreBlock;
+import org.json.simple.JSONObject;
 
 import java.util.TimerTask;
 
@@ -77,7 +78,7 @@ public class Loadout{
         if(item==null){
             return -1;
         }
-        int idx=get_item_index(item);
+        int idx=getItemIndex(item);
         int loadout_amount=storage[idx];
         int core_amount=core.items.get(item);
         if (to_core){
@@ -99,22 +100,14 @@ public class Loadout{
         return amount;
     }
 
-    public int get_item_index(Item item){
-        int idx=0;
-        for(Item _item:content.items()) {
-            if(MyPlugin.verify_item(_item)){continue;}
-            if (item==_item) {
-                break;
-            }
-            idx++;
-        }
-        return idx;
+    public int getItemIndex(Item item){
+        return MyPlugin.items.indexOf(item);
     }
 
     public void use_loadout(Player player){
         Teams.TeamData teamData = state.teams.get(player.getTeam());
         CoreBlock.CoreEntity core = teamData.cores.first();
-        int idx=get_item_index(launch_item);
+        int idx=getItemIndex(launch_item);
         int amount=get_transport_amount(launch_item,launch_amount,core,launch_to_core);
         String message=(launch_item==null ? "all" : amount +" "+launch_item.name);
 
@@ -159,10 +152,7 @@ public class Loadout{
         }else{
             if(launch_item==null){
                 int index=0;
-                for(Item item:content.items()) {
-                    if (MyPlugin.verify_item(item)) {
-                        continue;
-                    }
+                for(Item item:MyPlugin.items) {
                     int finalAmount=get_transport_amount(item,launch_amount,core,launch_to_core);
                     core.items.remove(item,finalAmount);
                     storage[index] += finalAmount;
@@ -187,8 +177,7 @@ public class Loadout{
         int idx=0;
         StringBuilder message= new StringBuilder();
         message.append("\n");
-        for(Item item:content.items()){
-            if(MyPlugin.verify_item(item)){continue;}
+        for(Item item:MyPlugin.items){
             message.append(storage[idx] != capacity ? "[white]" : "[green]");
             message.append(storage[idx]).append(MyPlugin.itemIcons[idx]).append("\n");
             idx++;
@@ -202,20 +191,20 @@ public class Loadout{
         interrupted=true;
     }
 
-    public String get_data() {
-        StringBuilder data = new StringBuilder();
-        for(int i:storage){
-            data.append(i).append("/");
+    public JSONObject get_data() {
+        JSONObject data=new JSONObject();
+        int idx=0;
+        for(Item item:MyPlugin.items){
+            data.put(item.name,storage[idx]);
+            idx++;
         }
-        return data.toString();
+        return data;
     }
 
-    public void load_data(String readLine){
+    public void load_data(JSONObject data){
         int idx=0;
-        for(String num:readLine.split("/")){
-            if (idx<storage.length){
-            storage[idx]=Integer.parseInt(num);
-            }
+        for(Item item:MyPlugin.items){
+            storage[idx]=((Long)data.get(item.name)).intValue();
             idx++;
         }
     }

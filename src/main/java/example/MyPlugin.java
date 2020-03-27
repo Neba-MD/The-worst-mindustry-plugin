@@ -1,14 +1,13 @@
 package example;
 
 import arc.Events;
-
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Timer;
+import jdk.nashorn.internal.objects.Global;
+import jdk.nashorn.internal.runtime.Context;
 import mindustry.content.Blocks;
-
 import mindustry.entities.type.Player;
-
 import mindustry.game.EventType;
 import mindustry.game.Teams;
 import mindustry.gen.Call;
@@ -16,30 +15,34 @@ import mindustry.plugin.Plugin;
 import mindustry.type.Item;
 import mindustry.type.ItemType;
 import mindustry.world.Block;
-
 import mindustry.world.blocks.storage.CoreBlock;
 
-
-
 import java.io.*;
+import java.util.ArrayList;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static mindustry.Vars.*;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 public class MyPlugin extends Plugin{
-    Loadout loadout=new Loadout();
-    UnitFactory factory=new UnitFactory(loadout);
-    Vote vote=new Vote(factory,loadout);
+    Loadout loadout;
+    UnitFactory factory;
+    Vote vote;
 
     static String dir="config/mods/myPlugin/";
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
     static int max_transport=5000;
     static int transport_time=5*60;
+    static ArrayList<Item> items=new ArrayList<>();
 
     int autoSaveFrequency=5;
 
-    private final String filename=dir+"data.txt";
+    private final String filename=dir+"data.json";
 
 
 
@@ -66,14 +69,22 @@ public class MyPlugin extends Plugin{
         Events.on(EventType.WorldLoadEvent.class,e-> interrupted());
 
         Events.on(EventType.ServerLoadEvent.class,e->{
+            loadItems();
+            loadout=new Loadout();
+            factory=new UnitFactory(loadout);
+            vote=new Vote(factory,loadout);
             if(!makeDir()){
                 Log.info("There wos a problem with creating "+dir+" please add it manually.");
                 return;
             }
-            load_data();
+            //load_data();
             Log.info("Saves once a "+autoSaveFrequency+"min.");
             autoSave();
+            load_data();
             factory.config();
+
+
+
         });
         /*Events.on(EventType.BuildSelectEvent.class, event -> {
             if(!event.breaking && event.builder != null && event.builder.buildRequest() != null && event.builder.buildRequest().block == Blocks.thoriumReactor && event.builder instanceof Player){
@@ -82,6 +93,13 @@ public class MyPlugin extends Plugin{
             }
         });*/
         }
+
+    private void loadItems(){
+        for(Item item:content.items()){
+            if(item.type!= ItemType.material){continue;}
+            items.add(item);
+        }
+    }
 
     private boolean makeDir(){
         File dir=new File(MyPlugin.dir);
@@ -100,16 +118,21 @@ public class MyPlugin extends Plugin{
     }
 
     private void load_data() {
-        try {
-            FileReader fileReader = new FileReader(filename);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            loadout.load_data(bufferedReader.readLine());
-            factory.load_data(bufferedReader.readLine());
-            bufferedReader.close();
+
+        try(FileReader fileReader = new FileReader(filename)) {
+
+            JSONParser jsonParser=new JSONParser();
+            Object obj=jsonParser.parse(fileReader);
+            JSONObject saveData=(JSONObject)obj;
+            loadout.load_data((JSONObject)saveData.get("loadout"));
+            factory.load_data((JSONObject)saveData.get("factory"));
+            fileReader.close();
             Log.info("Data loaded.");
-        }catch (FileNotFoundException ex){
-            Log.info("No saves found.New save file "+filename+" will be created.");
+        }catch (FileNotFoundException ex) {
+            Log.info("No saves found.New save file " + filename + " will be created.");
             save_data();
+        }catch (ParseException ex){
+            Log.info("Json file is invalid.");
         }catch (IOException ex){
             Log.info("Error when loading data from "+filename+".");
         }
@@ -117,14 +140,14 @@ public class MyPlugin extends Plugin{
     }
 
     private void save_data(){
-        try {
-            FileWriter fileWriter = new FileWriter(filename);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(loadout.get_data());
-            bufferedWriter.newLine();
-            bufferedWriter.write(factory.get_data());
-            bufferedWriter.newLine();
-            bufferedWriter.close();
+
+        JSONObject savedata=new JSONObject();
+        savedata.put("loadout",loadout.get_data());
+        savedata.put("factory",factory.get_data());
+        try(FileWriter file = new FileWriter(filename))
+        {
+            file.write(savedata.toJSONString());
+            file.close();
             Log.info("Data saved.");
         }catch (IOException ex){
             Log.info("Error when saving data.");
@@ -177,8 +200,7 @@ public class MyPlugin extends Plugin{
         boolean can_build=true;
         Teams.TeamData teamData = state.teams.get(player.getTeam());
         CoreBlock.CoreEntity core = teamData.cores.first();
-        for(Item item:content.items()){
-            if(verify_item(item)){continue;}
+        for(Item item:items){
             if (!core.items.has(item, cost)) {
                 can_build=false;
                 player.sendMessage("[scarlet]" + item.name + ":" + core.items.get(item) +"/"+ cost);
@@ -187,21 +209,17 @@ public class MyPlugin extends Plugin{
         if(can_build) {
             Call.onConstructFinish(world.tile(player.tileX(), player.tileY()), core_tipe, 0, (byte) 0, player.getTeam(), false);
             if (world.tile(player.tileX(), player.tileY()).block() == core_tipe) {
-
                 player.sendMessage("[green]Core spawned!");
                 Call.sendMessage("[scarlet][Server][]Player [green]"+player.name+" []has taken a portion of resources to build a core!");
-                for(Item item:content.items()){
-                    if(verify_item(item)){continue;}
+                for(Item item:items){
                     core.items.remove(item, cost);
                 }
-
             } else {
-                player.sendMessage("[scarlet]Core spawn failed!Invalid placement!");
+                player.sendMessage("[scarlet][Server]Core spawn failed!Invalid placement!");
             }
             return;
         }
-
-        player.sendMessage("[scarlet]Core spawn failed!Not enough resorces.");
+        player.sendMessage("[scarlet][Server]Core spawn failed!Not enough resorces.");
     }
 
     @Override
@@ -248,8 +266,7 @@ public class MyPlugin extends Plugin{
         /*handler.<Player>register("add","add items",(args,player)->{
             Teams.TeamData teamData = state.teams.get(player.getTeam());
             CoreBlock.CoreEntity core = teamData.cores.first();
-            for(Item item:content.items()){
-                if(verify_item(item)){continue;}
+            for(Item item:items){
                 core.items.add(item, 40000);
             }
         });*/

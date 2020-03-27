@@ -7,6 +7,7 @@ sourceCompatibility = 1.8
 repositories{
     mavenCentral()
     maven{ url 'https://www.jitpack.io' }
+
 }
 
 ext{
@@ -17,6 +18,7 @@ ext{
 dependencies{
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    compile fileTree(include: ['*.jar'], dir: 'libs')
 }
 
 jar{

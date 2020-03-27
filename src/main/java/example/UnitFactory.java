@@ -14,13 +14,16 @@ import java.util.*;
 import arc.util.Timer;
 import mindustry.type.UnitType;
 import mindustry.world.Tile;
-
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 
 public class UnitFactory {
     boolean traveling=false;
     boolean interrupted=false;
 
+    String[] statKeys=new String[12];
     Loadout loadout;
     HashMap<String, int[]> unitStats = new HashMap<>();
     ArrayList<Build_request> requests = new ArrayList<>();
@@ -30,7 +33,7 @@ public class UnitFactory {
     int dropPosX =0;
     int dropPosY =0;
 
-    private final String configFile=MyPlugin.dir+"config.txt";
+    private final String configFile=MyPlugin.dir+"config.json";
 
     static final int buildTime = 10;
     static final int buildLimit=11;
@@ -39,6 +42,13 @@ public class UnitFactory {
     public static final int dropPointRange=4;
 
     public UnitFactory(Loadout loadout) {
+        int idx=0;
+        for(Item item:MyPlugin.items){
+            statKeys[idx]=item.name;
+            idx++;
+        }
+        statKeys[buildTime]="buildTime";
+        statKeys[buildLimit]="buildLimit";
         this.loadout=loadout;
     }
 
@@ -52,53 +62,42 @@ public class UnitFactory {
     }
 
     public void config(){
-        try {
-            FileReader fileReader = new FileReader(configFile);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String data;
+        try(FileReader fileReader = new FileReader(configFile)) {
             unitStats.clear();
-            boolean loaded=false;
-            while ((data=bufferedReader.readLine())!=null){
-                String[] splitdata=data.split("/");
-                String unitName=splitdata[0];
-                if(getUnitType(unitName)==null){
-                    Log.info("Non existent unit name "+unitName+".It will be ignored.");
+            JSONParser jsonParser=new JSONParser();
+            JSONObject settings =(JSONObject) jsonParser.parse(fileReader);
+            for(Object setting:settings.keySet()){
+                if(getUnitType((String)setting)==null){
+                    Log.info("Unit name "+setting+" is invalid.It will be ignored.");
+                    StringBuilder list=new StringBuilder();
+                    for(UnitType unit:content.units()){
+                        list.append(unit.name).append(" ");
+                    }
+                    Log.info("Valid units: "+list.toString());
                     continue;
                 }
-                int[] unitInfo=new int[13];
+                int[] info=new int[13];
                 int idx=0;
-                for(String num:splitdata){
-                    if(idx>unitInfo.length-2){
-                        Log.info("WARMING:You entered too mani information for "+unitName+".Surplus numbers will be ignored.");
+                boolean fail=false;
+                JSONObject jsInfo=(JSONObject)settings.get(setting);
+                for(String key:statKeys){
+                    if(!jsInfo.containsKey(key)){
+                        Log.info("Config loading:missing property "+key+" in "+setting+". "+setting+" will be ignored.");
+                        fail=true;
                         break;
                     }
-                    if(MyPlugin.isNotInteger(num)) {
-                        if (num.equals(unitName)) {
-                            continue;
-                        }
-                        Log.info("You entered "+unitName+" information wrong.It all has to be integers.");
-                        break;
-                    }
-                    unitInfo[idx]=Integer.parseInt(num);
+                    info[idx]=((Long)jsInfo.get(key)).intValue();
                     idx++;
                 }
-                if(idx<unitInfo.length-1){
-                    Log.info("You entered too few information for "+unitName+"."+unitName+ " will be ignored.");
-                    continue;
-                }
-                unitStats.put(unitName,unitInfo);
-                loaded=true;
+                if(fail){continue;}
+                unitStats.put((String)setting,info);
             }
-            bufferedReader.close();
-            if(!loaded){
-                Log.info("There wos nothing to load. "+configFile+"wos not edited of have a typo in it.");
-                return;
-            }
-            Log.info("Config loaded.");
-        }catch (FileNotFoundException ex){
+            Log.info(unitStats.size()==0 ? "Nothing to load from config file.":"Config loaded.");
+        }catch (FileNotFoundException ex) {
             Log.info("No config file found.");
             createDefaultConfig();
-
+        }catch (ParseException ex){
+                Log.info("Json file is invalid");
         }catch (IOException ex){
             Log.info("Error when loading data from "+configFile+".");
         }
@@ -109,31 +108,15 @@ public class UnitFactory {
         for(UnitType unit:content.units()){
             list.append(unit.name).append(" ");
         }
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(configFile));
-            bw.write("This is config file.Formatting of your config is as follows:");
-            bw.newLine();
-            bw.write("unitName/copper/lead/metaglass/graphite/titanium/thorium/silicon/plastanium/phaseFabric/surgeAlloy/"+
-                    "buildTime/buildLimit");
-            bw.newLine();
-            bw.write("For example:");
-            bw.newLine();
-            bw.write("eradicator/20000/20000/8000/6000/10000/5000/10000/2000/2000/2000/3/1");
-            bw.newLine();
-            bw.write("unitName specifies what type of unit can factory build.");
-            bw.newLine();
-            bw.write("The list of valid units:");
-            bw.newLine();
-            bw.write(list.toString());
-            bw.newLine();
-            bw.write("first ten numbers specif how match will unit cost in resources");
-            bw.newLine();
-            bw.write("buildTime sets how log it takes to build unit");
-            bw.newLine();
-            bw.write("buildLimit sets how many units can factory build at the same time");
-            bw.newLine();
-            bw.write("Don t forget to delete all unnecessary text");
-            bw.close();
+        try(FileWriter file = new FileWriter(configFile)) {
+
+            JSONObject unit =new JSONObject();
+            for(String key:statKeys){
+                unit.put(key,5);
+            }
+            JSONObject config =new JSONObject();
+            config.put("eruptor",unit);
+            file.write(config.toJSONString());
             Log.info("Default "+configFile+" successfully created.Edit it and use apply-config command.");
         }catch (IOException ex){
             Log.info("Error when loading default config.");
@@ -375,23 +358,17 @@ public class UnitFactory {
 
     }
 
-    public String get_data() {
-        StringBuilder data= new StringBuilder();
-        for(int[] stat:unitStats.values()){
-            data.append(stat[unitCount]).append("/");
+    public JSONObject get_data() {
+        JSONObject data=new JSONObject();
+        for (String name:unitStats.keySet()){
+            data.put(name,get_unit_count(name));
         }
-        return data.toString();
+        return data;
     }
 
-    public void load_data(String facData){
-        int idx=0;
-        String[] vals=facData.split("/");
-        for(int[] stat:unitStats.values()){
-            if(vals.length==idx){
-                break;
-            }
-            stat[unitCount]=Integer.parseInt(vals[idx]);
-            idx++;
+    public void load_data(JSONObject data){
+        for (String name:unitStats.keySet()){
+            unitStats.get(name)[unitCount]=((Long)data.get(name)).intValue();
         }
     }
 }
