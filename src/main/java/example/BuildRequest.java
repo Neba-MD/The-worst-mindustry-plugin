@@ -1,13 +1,11 @@
 package example;
 
 import arc.util.Timer;
-import mindustry.entities.type.BaseUnit;
-import mindustry.entities.type.Player;
 import mindustry.gen.Call;
 
 import java.util.TimerTask;
 
-public class Build_request{
+public class BuildRequest {
     public boolean building=false;
     public boolean interrupted=false;
 
@@ -17,7 +15,7 @@ public class Build_request{
     String unitName;
     UnitFactory factory;
 
-    public Build_request(String unitName,int time,int amount,UnitFactory factory){
+    public BuildRequest(String unitName, int time, int amount, UnitFactory factory){
         this.unitName=unitName;
         this.time=time;
         this.factory=factory;

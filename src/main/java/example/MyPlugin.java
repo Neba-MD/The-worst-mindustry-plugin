@@ -4,8 +4,6 @@ import arc.Events;
 import arc.util.CommandHandler;
 import arc.util.Log;
 import arc.util.Timer;
-import jdk.nashorn.internal.objects.Global;
-import jdk.nashorn.internal.runtime.Context;
 import mindustry.content.Blocks;
 import mindustry.entities.type.Player;
 import mindustry.game.EventType;
@@ -24,7 +22,6 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static mindustry.Vars.*;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -33,7 +30,7 @@ public class MyPlugin extends Plugin{
     Loadout loadout;
     UnitFactory factory;
     Vote vote;
-
+    
     static String dir="config/mods/myPlugin/";
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
     static int max_transport=5000;
@@ -173,12 +170,8 @@ public class MyPlugin extends Plugin{
         }
         return false;
     }
-
-    public static boolean verify_item(Item item){
-        return item.type!= ItemType.material;
-    }
     
-    public int get_storage_size() {
+    public int getStorageSize() {
         int res=0;
         for(int x = 0; x < world.width(); x++){
             for(int y = 0; y < world.height(); y++){
@@ -194,6 +187,17 @@ public class MyPlugin extends Plugin{
             }
         }
         return res;
+    }
+
+    private int getAmount(String[] arg,Player player){
+        if(arg.length==1){
+            return 1;
+        }
+        if(isNotInteger(arg[1])){
+            player.sendMessage("[scarlet][Server][]Amount has to be integer.");
+            return -1;
+        }
+        return Integer.parseInt(arg[1]);
     }
 
     public void build_core(int cost,Player player,Block core_tipe){
@@ -221,7 +225,7 @@ public class MyPlugin extends Plugin{
         }
         player.sendMessage("[scarlet][Server]Core spawn failed!Not enough resorces.");
     }
-
+    
     @Override
     public void registerServerCommands(CommandHandler handler){
         handler.register("myplugin-save","saves loadout and factory progress immediately.",args->
@@ -273,7 +277,7 @@ public class MyPlugin extends Plugin{
 
         handler.<Player>register("build-core","<small/normal/big>", "Makes new core", (arg, player) -> {
             // Core type
-            int storage= get_storage_size();
+            int storage= getStorageSize();
             Block to_build = Blocks.coreShard;
             int cost=(int)(storage*.25f);
             switch(arg[0]){
@@ -359,14 +363,6 @@ public class MyPlugin extends Plugin{
             Call.onInfoMessage(player.con,message);
                 });
     }
-    private int getAmount(String[] arg,Player player){
-        if(arg.length==1){
-            return 1;
-        }
-        if(isNotInteger(arg[1])){
-            player.sendMessage("[scarlet][Server][]Amount has to be integer.");
-            return -1;
-        }
-        return Integer.parseInt(arg[1]);
-    }
+   
+    
 }

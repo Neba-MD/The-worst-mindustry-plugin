@@ -10,7 +10,6 @@ import org.json.simple.JSONObject;
 
 import java.util.TimerTask;
 
-import static mindustry.Vars.content;
 import static mindustry.Vars.state;
 
 public class Loadout{
@@ -26,8 +25,7 @@ public class Loadout{
     boolean interrupted=false;
     
     public Item get_item_by_name(String name){
-        for(Item item:content.items()) {
-            if(MyPlugin.verify_item(item)){continue;}
+        for(Item item:MyPlugin.items) {
             if (item.name.equals(name)) {
                 return item;
             }
@@ -53,10 +51,7 @@ public class Loadout{
         Item picked_item=get_item_by_name(sItem);
         if (picked_item==null){
             StringBuilder message= new StringBuilder("  ");
-            for(Item item:content.items()) {
-                if (MyPlugin.verify_item(item)) {
-                    continue;
-                }
+            for(Item item:MyPlugin.items) {
                 message.append(item.name).append("  ");
             }
             player.sendMessage("[scarlet][Server][]You taped the name of item wrong!");
@@ -138,17 +133,7 @@ public class Loadout{
                     Call.sendMessage("[scarlet][Server][green]"+message+" arrived to core");
                 }
             };
-            Timer.schedule(()->{
-                transporting=false;
-                if(interrupted){
-                    Call.sendMessage("[scarlet][Server][]Base is gone ,[orange]"+message+"[white] going back to loadout.");
-                    storage[idx]+=amount;
-                    interrupted=false;
-                    return;
-                }
-                core.items.add(finalItem,amount);
-                Call.sendMessage("[scarlet][Server][green]"+message+" arrived to core");
-            },time);
+            Timer.schedule(transport,time);
         }else{
             if(launch_item==null){
                 int index=0;

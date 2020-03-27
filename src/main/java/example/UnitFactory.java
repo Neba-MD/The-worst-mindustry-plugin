@@ -26,7 +26,7 @@ public class UnitFactory {
     String[] statKeys=new String[12];
     Loadout loadout;
     HashMap<String, int[]> unitStats = new HashMap<>();
-    ArrayList<Build_request> requests = new ArrayList<>();
+    ArrayList<BuildRequest> requests = new ArrayList<>();
 
     int time=0;
     int buildAmount=0;
@@ -148,10 +148,7 @@ public class UnitFactory {
         buildAmount=amount;
         boolean can_build = true;
         int idx = 0;
-        for (Item item : content.items()) {
-            if (MyPlugin.verify_item(item)) {
-                continue;
-            }
+        for (Item item : MyPlugin.items) {
             int requires = unitStats.get(unitName)[idx]*amount;
             int stored = loadout.storage[idx];
             if (requires > stored) {
@@ -216,7 +213,7 @@ public class UnitFactory {
     }
 
     private int currentUnitBuildTime() {
-        for (Build_request b : requests) {
+        for (BuildRequest b : requests) {
             if (b.building) {
                 return b.time;
             }
@@ -225,7 +222,7 @@ public class UnitFactory {
     }
 
     private String is_building() {
-        for (Build_request b : requests) {
+        for (BuildRequest b : requests) {
             if (b.building && !b.interrupted) {
                 return b.unitName;
             }
@@ -236,8 +233,6 @@ public class UnitFactory {
     public void interrupted() {
         interrupted = true;
     }
-
-
 
     public void add_units(UnitType unitType,ArrayList<BaseUnit> units,Player player,int amount){
         amount=amount==-1 ? unitStats.get(unitType.name)[unitCount]:amount;
@@ -295,16 +290,11 @@ public class UnitFactory {
     }
 
     public void build_unit(String unitName,int amount) {
-        int idx = 0;
-        for (Item item : content.items()) {
-            if (MyPlugin.verify_item(item)) {
-                continue;
-            }
-            int requires = unitStats.get(unitName)[idx];
-            loadout.storage[idx] -= requires*amount;
-            idx++;
+        for (int i=0;i<MyPlugin.items.size();i++) {
+            int requires = unitStats.get(unitName)[i];
+            loadout.storage[i] -= requires*amount;
         }
-        Build_request b = new Build_request(unitName,unitStats.get(unitName)[buildTime] * 60,buildAmount, this);
+        BuildRequest b = new BuildRequest(unitName,unitStats.get(unitName)[buildTime] * 60,buildAmount, this);
         requests.add(b);
     }
 
@@ -316,7 +306,7 @@ public class UnitFactory {
             message.append(name).append("/").append(get_unit_count(name)).append("\n");
         }
         message.append("\n");
-        for (Build_request b : requests) {
+        for (BuildRequest b : requests) {
             String info=b.info();
             if(info!=null){
                 inProgress=true;
