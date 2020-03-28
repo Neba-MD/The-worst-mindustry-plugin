@@ -136,12 +136,7 @@ public class UnitFactory {
                     "[]. It can build oni reaper,lich and eradicator.");
             return false;
         }
-        int maxAmount=unitStats.get(unitName)[buildLimit];
-        if(amount>maxAmount){
-            player.sendMessage("[scarlet][Server][]Factory cannot build [orange]"+amount+" "+
-                    unitName+"[] at the same time.Maximum for this unit is [orange]"+maxAmount+"[].");
-            return false;
-        }else if(amount==0){
+        if(amount==0){
             player.sendMessage("[scarlet][Server][]Done!");
             return false;
         }
@@ -290,11 +285,13 @@ public class UnitFactory {
     }
 
     public void build_unit(String unitName,int amount) {
+        int[] thisUnitstats =unitStats.get(unitName);
         for (int i=0;i<MyPlugin.items.size();i++) {
-            int requires = unitStats.get(unitName)[i];
+            int requires = thisUnitstats[i];
             loadout.storage[i] -= requires*amount;
         }
-        BuildRequest b = new BuildRequest(unitName,unitStats.get(unitName)[buildTime] * 60,buildAmount, this);
+        int buildT=(int)(amount/(float)thisUnitstats[buildLimit]*thisUnitstats[buildTime]*60);
+        BuildRequest b = new BuildRequest(unitName,buildT,buildAmount, this);
         requests.add(b);
     }
 

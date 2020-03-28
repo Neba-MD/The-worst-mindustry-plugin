@@ -8,7 +8,6 @@ import java.util.TimerTask;
 public class BuildRequest {
     public boolean building=false;
     public boolean interrupted=false;
-
     public int time;
     public int amount;
 

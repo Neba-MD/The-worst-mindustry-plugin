@@ -30,7 +30,8 @@ public class MyPlugin extends Plugin{
     Loadout loadout;
     UnitFactory factory;
     Vote vote;
-    
+
+    String[] saveReq={"loadout","factory"};
     static String dir="config/mods/myPlugin/";
     static String[] itemIcons={"\uF838","\uF837","\uF836","\uF835","\uF832","\uF831","\uF82F","\uF82E","\uF82D","\uF82C"};
     static int max_transport=5000;
@@ -121,6 +122,12 @@ public class MyPlugin extends Plugin{
             JSONParser jsonParser=new JSONParser();
             Object obj=jsonParser.parse(fileReader);
             JSONObject saveData=(JSONObject)obj;
+            for(String r:saveReq){
+                if(!saveData.containsKey(r)){
+                    Log.info("Failed to load save file.");
+                    return;
+                }
+            }
             loadout.load_data((JSONObject)saveData.get("loadout"));
             factory.load_data((JSONObject)saveData.get("factory"));
             fileReader.close();
