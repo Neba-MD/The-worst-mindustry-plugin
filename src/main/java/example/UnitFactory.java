@@ -133,7 +133,7 @@ public class UnitFactory {
         }
         if (!unitStats.containsKey(unitName)) {
             player.sendMessage("[scarlet][Server][]Factory cannot build [red]" + unitName +
-                    "[]. It can build oni reaper,lich and eradicator.");
+                    "[]. Check [orange]/f-info []for the list of units.");
             return false;
         }
         if(amount==0){
@@ -191,7 +191,7 @@ public class UnitFactory {
             return false;
         }
         if (amount>maxDeployment){
-            player.sendMessage("[scarlet][Server][]you cannot deploy mort then "+maxDeployment+" at the time.");
+            player.sendMessage("[scarlet][Server][]you cannot deploy more then "+maxDeployment+" at the time.");
             return false;
         }
         int x = (int) player.x;
